@@ -1,0 +1,1308 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Cook mode</title>
+<meta name="description" content="Step-by-step cook mode for my recipes">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Cook mode">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#EDF1E8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F1612" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400..700&family=Fraunces:opsz,wght,SOFT@9..144,400..700,0..100&display=swap">
+<style>
+/* ---------- Tokens ---------- */
+:root{
+  --paper:#EDF1E8; --ink:#1C2620; --ink-2:#46544A; --muted:#6B786E;
+  --basil:#3F7A4E; --basil-ink:#FFFFFF; --rosemary:#24452F; --leaf:#CFE0C8;
+  --saffron:#E9B949; --saffron-wash:#FBE7A6; --saffron-ink:#4A3604;
+  --chilli:#B83E28; --chilli-wash:#F6D8CF;
+  --glass:rgba(255,255,255,.56); --glass-strong:rgba(255,255,255,.82); --glass-line:rgba(255,255,255,.75);
+  --line:rgba(36,69,47,.14);
+  --shadow:0 12px 32px rgba(36,69,47,.10), 0 1px 2px rgba(36,69,47,.08);
+  --done:#98A39A;
+  --blob1:#C3DBB8; --blob2:#F5DDA3; --blob3:#CBE1D8;
+  --serif:"Fraunces", ui-serif, "New York", Georgia, serif;
+  --sans:"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --step-scale:1;
+  --safe-t:env(safe-area-inset-top, 0px); --safe-b:env(safe-area-inset-bottom, 0px);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0F1612; --ink:#E5EDE4; --ink-2:#B9C7BC; --muted:#8A988D;
+    --basil:#7DB98A; --basil-ink:#0C1810; --rosemary:#A9D3B2; --leaf:#22382A;
+    --saffron:#F0C45C; --saffron-wash:rgba(240,196,92,.24); --saffron-ink:#F7DC97;
+    --chilli:#F07A62; --chilli-wash:rgba(240,122,98,.20);
+    --glass:rgba(26,38,30,.58); --glass-strong:rgba(28,41,32,.9); --glass-line:rgba(255,255,255,.08);
+    --line:rgba(255,255,255,.12);
+    --shadow:0 12px 32px rgba(0,0,0,.35);
+    --done:#5E6B61;
+    --blob1:#1D3826; --blob2:#3A3016; --blob3:#15302A;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0F1612; --ink:#E5EDE4; --ink-2:#B9C7BC; --muted:#8A988D;
+  --basil:#7DB98A; --basil-ink:#0C1810; --rosemary:#A9D3B2; --leaf:#22382A;
+  --saffron:#F0C45C; --saffron-wash:rgba(240,196,92,.24); --saffron-ink:#F7DC97;
+  --chilli:#F07A62; --chilli-wash:rgba(240,122,98,.20);
+  --glass:rgba(26,38,30,.58); --glass-strong:rgba(28,41,32,.9); --glass-line:rgba(255,255,255,.08);
+  --line:rgba(255,255,255,.12);
+  --shadow:0 12px 32px rgba(0,0,0,.35);
+  --done:#5E6B61;
+  --blob1:#1D3826; --blob2:#3A3016; --blob3:#15302A;
+  color-scheme:dark;
+}
+
+/* ---------- Base ---------- */
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font-family:var(--sans);color:var(--ink);background:var(--paper);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh;overflow-wrap:break-word}
+#bg{position:fixed;inset:0;z-index:-1;pointer-events:none;background:
+  radial-gradient(60vmax 48vmax at -5% -5%, var(--blob1), transparent 62%),
+  radial-gradient(48vmax 42vmax at 105% 30%, var(--blob2), transparent 60%),
+  radial-gradient(60vmax 50vmax at 25% 105%, var(--blob3), transparent 62%), var(--paper)}
+a{color:var(--basil)}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--basil);outline-offset:2px}
+h1,h2,h3,h4{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;line-height:1.15;margin:0}
+.glass{background:var(--glass);-webkit-backdrop-filter:blur(22px) saturate(1.35);backdrop-filter:blur(22px) saturate(1.35);border:1px solid var(--glass-line);box-shadow:var(--shadow)}
+@supports not ((backdrop-filter:blur(1px)) or (-webkit-backdrop-filter:blur(1px))){.glass{background:var(--glass-strong)}}
+svg.i{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+svg.i.f{fill:currentColor;stroke:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.5em;min-height:48px;padding:0 20px;border-radius:999px;border:1px solid var(--line);background:var(--glass-strong);font-weight:600;text-decoration:none;color:var(--ink);white-space:nowrap}
+.btn.primary{background:var(--basil);color:var(--basil-ink);border-color:transparent}
+.btn.big{min-height:60px;padding:0 30px;font-size:19px}
+.btn.danger{color:var(--chilli)}
+.btn.quiet{background:transparent}
+.btn:disabled{opacity:.45;cursor:default}
+.icon-btn{width:48px;height:48px;border-radius:50%;display:inline-grid;place-items:center;border:1px solid var(--line);background:var(--glass-strong);padding:0;flex:none}
+.badge{display:inline-grid;place-items:center;min-width:24px;height:24px;padding:0 7px;border-radius:12px;background:var(--chilli);color:#fff;font-size:14px;font-weight:700}
+.muted{color:var(--muted)}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--glass-strong);font-weight:600;font-size:16px}
+.chip[aria-pressed="true"]{background:var(--rosemary);color:var(--paper);border-color:transparent}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* ---------- Pages ---------- */
+.page{max-width:1120px;margin:0 auto;padding:calc(var(--safe-t) + 24px) 20px calc(var(--safe-b) + 48px)}
+.topline{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.topline .grow{flex:1}
+.display{font-size:clamp(40px, 5vw + 18px, 64px);letter-spacing:-.02em;font-weight:600;font-variation-settings:"SOFT" 100,"opsz" 144}
+.lib-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.lib-head .count{font-size:18px;margin-top:6px}
+.lib-actions{display:flex;gap:10px;flex-wrap:wrap}
+@media (max-width:560px){.lib-actions .lbl{display:none}.lib-actions .btn{padding:0 14px}}
+.search{display:flex;align-items:center;gap:10px;border-radius:999px;padding:0 18px;min-height:54px;margin-bottom:14px}
+.search input{flex:1;border:0;background:transparent;font-size:18px;min-height:52px;outline:none}
+.cats{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;margin-bottom:10px;scrollbar-width:none}
+.cats::-webkit-scrollbar{display:none}
+.cats .chip{flex:none}
+.group-h{font-size:26px;margin:26px 2px 12px;color:var(--rosemary)}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.rcard{display:flex;flex-direction:column;gap:8px;padding:18px 20px;border-radius:22px;text-decoration:none;color:var(--ink);min-height:116px}
+.rcard .t{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-size:23px;font-weight:600;line-height:1.2}
+.meta{display:flex;flex-wrap:wrap;gap:6px 14px;color:var(--ink-2);font-size:15.5px}
+.rcard .hist{color:var(--muted);font-size:14.5px;margin-top:auto}
+.banner{display:flex;align-items:center;gap:16px;padding:16px 18px;border-radius:22px;margin-bottom:18px;flex-wrap:wrap}
+.banner .grow{flex:1;min-width:200px}
+.banner b{font-family:var(--serif);font-size:21px;font-weight:600;display:block}
+.empty{padding:36px 28px;border-radius:28px;max-width:640px}
+.empty h2{font-size:30px;margin-bottom:10px}
+.empty p{margin:0 0 20px;color:var(--ink-2)}
+.empty .row{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Recipe overview */
+.r-hero{margin:8px 0 22px}
+.r-hero h1{font-size:clamp(34px, 4vw + 18px, 58px);letter-spacing:-.015em;font-variation-settings:"SOFT" 100,"opsz" 144}
+.r-hero .sub{color:var(--ink-2);margin-top:8px;font-size:17px}
+.facts{display:flex;flex-wrap:wrap;gap:10px;margin:18px 0 0}
+.fact{padding:10px 16px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--line);font-size:15.5px;line-height:1.25}
+.fact b{display:block;font-size:20px;font-family:var(--serif);font-weight:600}
+.start-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin:22px 0}
+.switch{display:inline-flex;align-items:center;gap:10px;min-height:48px;cursor:pointer;user-select:none}
+.switch input{appearance:none;-webkit-appearance:none;width:52px;height:32px;border-radius:16px;background:var(--line);position:relative;margin:0;transition:background .15s;flex:none;cursor:pointer}
+.switch input::after{content:"";position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.switch input:checked{background:var(--basil)}
+.switch input:checked::after{transform:translateX(20px)}
+.card{border-radius:22px;padding:20px 22px;margin-bottom:16px}
+.card h2{font-size:24px;margin-bottom:10px}
+.card h3{font-size:19px;margin:14px 0 6px}
+.card p{margin:.3em 0}
+.card ul,.card ol{margin:.3em 0;padding-left:1.3em}
+.card.ahead{border-left:6px solid var(--saffron)}
+.two-col{display:grid;gap:16px}
+@media (min-width:820px){.two-col{grid-template-columns:minmax(300px,2fr) 3fr;align-items:start}.two-col>.sticky{position:sticky;top:16px;max-height:calc(100vh - 32px);overflow:auto}}
+.method h3{color:var(--rosemary);margin:18px 0 8px;font-size:21px}
+.method ol{list-style:none;padding:0;margin:0;counter-reset:m}
+.method li{position:relative;padding:0 0 14px 40px;counter-increment:m}
+.method li::before{content:counter(m);position:absolute;left:0;top:1px;width:28px;height:28px;border-radius:50%;background:var(--leaf);color:var(--rosemary);font-weight:700;font-size:15px;display:grid;place-items:center}
+.method .mt{font-weight:700}
+.method .avg{color:var(--muted);font-size:14.5px}
+.subs{margin:.4em 0 0;padding-left:1.2em}
+.subs li{padding:0 0 4px 0!important}
+.subs li::before{content:none!important}
+.caution{margin-top:10px;padding:10px 14px;border-radius:14px;background:var(--chilli-wash);color:var(--ink);font-weight:600}
+table.nut{border-collapse:collapse;width:100%;font-size:15.5px}
+table.nut th,table.nut td{text-align:left;padding:7px 10px 7px 0;border-bottom:1px solid var(--line);vertical-align:top}
+table.nut th{color:var(--ink-2);font-weight:700}
+table.nut td,.pre{white-space:pre-line}
+.scroll-x{overflow-x:auto}
+details.conv summary{cursor:pointer;font-weight:700;min-height:40px;display:flex;align-items:center}
+.hist-row{display:flex;gap:12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.hist-row .grow{flex:1;min-width:180px}
+
+/* Ingredients */
+.ing-group h4{font-family:var(--sans);font-size:15px;font-weight:700;color:var(--rosemary);margin:16px 0 6px}
+.ing-group:first-child h4{margin-top:4px}
+.ing-group ul{list-style:none;margin:0;padding:0}
+.ing-row{padding:8px 10px 8px 12px;border-radius:12px;border-left:4px solid transparent;margin:2px 0;transition:background .2s,color .2s}
+.ing-row.now{background:var(--saffron-wash);border-left-color:var(--saffron);font-weight:700;color:var(--ink)}
+.ing-row.done{color:var(--done)}
+.ing-row.done .sc{color:inherit}
+.sc{font-weight:700;color:var(--basil)}
+.ing-row.now .sc{color:var(--saffron-ink)}
+.orig{display:block;font-size:13.5px;color:var(--muted);font-weight:400;margin-top:2px}
+.scaler{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding-bottom:12px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.scaler .lbl{font-weight:700}
+.stepper{display:inline-flex;align-items:center;border-radius:999px;border:1px solid var(--line);background:var(--glass-strong)}
+.stepper button{width:46px;height:46px;border:0;background:transparent;font-size:24px;font-weight:700;border-radius:50%}
+.stepper output{min-width:42px;text-align:center;font-weight:700;font-size:19px}
+.mults{display:flex;gap:6px;flex-wrap:wrap}
+.mults .chip{min-height:40px;padding:0 12px}
+
+/* ---------- Cook mode ---------- */
+.cook{position:fixed;inset:0;display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:auto auto minmax(0,1fr) auto}
+.cook-bar{display:flex;align-items:center;gap:12px;padding:calc(var(--safe-t) + 10px) 14px 10px;border-width:0 0 1px 0;border-radius:0}
+.cb-title{flex:1;min-width:0}
+.cb-title .rt{font-family:var(--serif);font-variation-settings:"SOFT" 100;font-weight:600;font-size:21px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cb-pos{border:0;background:transparent;padding:0;display:flex;align-items:center;gap:6px;color:var(--ink-2);font-size:16px;min-height:28px;text-align:left;max-width:100%;min-width:0}
+.cb-pos span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.cb-pos .short{display:none}
+.cb-pos svg{width:18px;height:18px}
+.sw{display:flex;align-items:center;gap:6px;flex:none}
+.sw-adj{width:52px;height:52px;border-radius:16px;border:1px solid var(--line);background:var(--glass-strong);font-weight:700;font-size:17px;padding:0}
+.sw-main{display:grid;grid-template-columns:auto auto;grid-template-rows:auto auto;column-gap:10px;align-items:center;min-height:52px;padding:4px 16px 4px 12px;border-radius:16px;border:1px solid transparent;background:var(--rosemary);color:var(--paper);text-align:left}
+.sw-main svg{grid-row:1 / span 2;width:24px;height:24px}
+.sw-total{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1}
+.sw-sub{font-size:13px;opacity:.85;font-variant-numeric:tabular-nums;line-height:1.1}
+.sw.paused .sw-main{background:var(--saffron-wash);color:var(--saffron-ink);border-color:var(--saffron)}
+.progress{height:5px;background:var(--line)}
+.progress i{display:block;height:100%;background:var(--basil);border-radius:0 3px 3px 0;transition:width .3s}
+.cook-body{display:grid;grid-template-columns:minmax(0,1fr);min-height:0;min-width:0;gap:16px;padding:16px 16px 0}
+.cook-side{display:none;border-radius:22px;padding:16px;overflow:auto;min-height:0;margin-bottom:16px;overscroll-behavior:contain}
+.stage{position:relative;overflow:auto;min-height:0;padding:4px 4px 24px;overscroll-behavior:contain;touch-action:pan-y;-webkit-user-select:none;user-select:none}
+.stem{position:relative;padding-left:36px;max-width:920px}
+.stem::before{content:"";position:absolute;left:13px;top:10px;bottom:10px;width:2px;background:var(--leaf);border-radius:2px}
+.node{position:relative}
+.node::before{content:"";position:absolute;left:-30px;top:12px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--basil)}
+.node.past::before{background:var(--basil)}
+.prev{opacity:.5;margin-bottom:14px;font-size:17px}
+.prev .pt{font-weight:700}
+.prev .px{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cur{border-radius:28px;padding:22px 26px 24px;margin-bottom:22px}
+.cur.node::before{left:-34px;top:30px;width:22px;height:22px;background:var(--saffron);border:4px solid var(--basil)}
+.cur-pos{color:var(--ink-2);font-size:16px;margin-bottom:4px}
+.cur-title{font-size:calc(clamp(24px, 1rem + 1.4vw, 34px) * var(--step-scale));margin-bottom:12px;color:var(--rosemary)}
+.cur-title.gen{font-weight:500}
+.step-text{font-size:calc(clamp(23px, 1.15rem + 1.5vw, 32px) * var(--step-scale));line-height:1.42;margin:0}
+.step-text + .subs, .cur .subs{font-size:calc(clamp(20px, 1rem + 1.1vw, 27px) * var(--step-scale));line-height:1.4;margin-top:12px}
+.cur .subs li{margin-bottom:8px}
+mark.ing{background:var(--saffron-wash);color:inherit;font-weight:700;border-radius:6px;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+mark.ing .sc{color:var(--saffron-ink)}
+.tphrase{border:0;background:transparent;padding:0;color:inherit;font:inherit;text-decoration:underline;text-decoration-color:var(--basil);text-decoration-thickness:3px;text-underline-offset:5px;cursor:pointer;text-align:inherit}
+.tchips{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.tchip{display:inline-flex;align-items:center;gap:8px;min-height:52px;padding:0 20px 0 16px;border-radius:999px;border:0;background:var(--basil);color:var(--basil-ink);font-weight:700;font-size:18px}
+.tchip.running{background:var(--leaf);color:var(--rosemary)}
+.stepstats{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:18px;color:var(--ink-2);font-size:15.5px;font-variant-numeric:tabular-nums}
+.stepstats b{color:var(--ink)}
+.strip{display:none;flex-wrap:wrap;gap:8px;margin:0 0 14px}
+.schip{display:inline-flex;align-items:baseline;gap:6px;padding:7px 13px;border-radius:12px;background:var(--saffron-wash);font-size:17px}
+.schip b{color:var(--saffron-ink)}
+.mise-list{list-style:none;padding:0;margin:8px 0 0}
+.mise-list label{display:flex;gap:14px;align-items:flex-start;padding:10px 0;font-size:calc(clamp(20px, 1rem + 1.1vw, 27px) * var(--step-scale));line-height:1.35;cursor:pointer}
+.mise-list input{width:28px;height:28px;margin-top:3px;accent-color:var(--basil);flex:none}
+.mise-list input:checked + span{color:var(--done);text-decoration:line-through}
+.up{margin-bottom:16px;font-size:18px}
+.up .ut{font-weight:700}
+.up .ux{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink-2)}
+.up .ua{color:var(--muted);font-size:14.5px}
+.up.u1{opacity:.72}.up.u2{opacity:.6}.up.u3{opacity:.5}.up.u4{opacity:.42}
+.cook-foot{display:flex;align-items:center;gap:12px;padding:12px 14px calc(var(--safe-b) + 12px);border-width:1px 0 0 0;border-radius:0;flex-wrap:wrap}
+.tray{display:flex;gap:8px;overflow-x:auto;flex:1 1 200px;min-width:0;scrollbar-width:none;align-items:center}
+.tray::-webkit-scrollbar{display:none}
+.pill{display:inline-flex;align-items:center;gap:8px;flex:none;min-height:52px;padding:0 6px 0 16px;border-radius:999px;border:1px solid var(--line);background:var(--glass-strong)}
+.pill .pl{max-width:12em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;font-size:15.5px}
+.pill .pt{font-weight:700;font-size:20px;font-variant-numeric:tabular-nums;min-width:3.2em}
+.pill button{width:40px;height:40px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;padding:0;font-weight:700;font-size:15px}
+.pill .pl-btn{width:auto;height:auto;min-height:48px;border-radius:0;display:flex;gap:8px;align-items:center;background:transparent;padding:0}
+.pill.paused{border-style:dashed}
+.pill.done{background:var(--chilli);color:#fff;border-color:transparent}
+@media (prefers-reduced-motion:no-preference){.pill.done{animation:pulse 1s ease-in-out infinite}}
+@keyframes pulse{50%{transform:scale(1.04)}}
+.pill.add{padding:0 18px;font-weight:700;gap:6px}
+.nav{display:flex;gap:10px;margin-left:auto}
+.nav .btn{min-height:60px;font-size:19px}
+.nav .next{min-width:190px}
+.drawer-btn{display:inline-flex}
+@media (min-width:820px){
+  .cook-body{grid-template-columns:minmax(300px,34%) minmax(0,1fr);padding:18px 20px 0;gap:20px}
+  .cook-side{display:block}
+  .drawer-btn{display:none}
+  .cook-bar{padding:calc(var(--safe-t) + 12px) 20px 12px}
+  .cook-foot{padding:12px 20px calc(var(--safe-b) + 14px)}
+}
+@media (min-width:1200px){.cook-body{grid-template-columns:380px minmax(0,1fr)}}
+@media (max-width:819px){
+  .strip{display:flex}
+  .schip{font-size:15.5px;padding:5px 11px}
+  .cb-pos .long{display:none}
+  .cb-pos .short{display:inline}
+  .stage{padding-top:2px}
+  .up.u2,.up.u3,.up.u4{display:none}
+  .cb-title .rt{font-size:18px}
+  .cook-bar{gap:8px;padding-left:10px;padding-right:10px}
+  .sw-adj{width:44px;height:48px;border-radius:14px;font-size:16px}
+  .sw-main{min-height:48px;padding:3px 12px 3px 9px;column-gap:7px}
+  .sw-total{font-size:19px}
+  .cur{padding:18px 18px 20px;border-radius:24px}
+  .stem{padding-left:24px}
+  .stem::before{left:7px}
+  .node::before{left:-23px;width:12px;height:12px}
+  .cur.node::before{left:-26px;width:18px;height:18px;border-width:3px}
+  .nav .next{min-width:0;flex:1}
+  .drawer-btn{min-height:52px;padding:0 16px}
+  .nav{flex:1 1 100%}
+  .cook-foot{gap:10px}
+}
+@media (max-width:420px){.cb-back .lbl{display:none}.sw-sub .lbl{display:none}}
+
+/* ---------- Summary ---------- */
+.big-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
+.big-facts .fact b{font-size:30px}
+.st-row{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.st-row .tm{font-weight:700;font-variant-numeric:tabular-nums;min-width:4.5em;text-align:right;font-size:18px}
+.st-row .adj{width:48px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--glass-strong);font-weight:700;padding:0}
+textarea{width:100%;min-height:96px;border-radius:16px;border:1px solid var(--line);background:var(--glass-strong);padding:12px 14px;font-size:17px;resize:vertical}
+.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+
+/* ---------- Sheets, toasts, alarm ---------- */
+.sheet-wrap{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;background:rgba(10,20,14,.32)}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .22s ease-out}}
+@keyframes up{from{transform:translateY(24px);opacity:.4}}
+.sheet{width:min(720px,100%);max-height:88vh;overflow:auto;border-radius:28px 28px 0 0;padding:18px 22px calc(var(--safe-b) + 24px);background:var(--glass-strong);-webkit-backdrop-filter:blur(26px) saturate(1.3);backdrop-filter:blur(26px) saturate(1.3);border:1px solid var(--glass-line);box-shadow:0 -10px 40px rgba(0,0,0,.18)}
+@media (min-width:820px){.sheet-wrap{align-items:center}.sheet{border-radius:28px;padding-bottom:24px}}
+.sheet-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.sheet-h h2{flex:1;font-size:26px}
+.sheet p{margin:.4em 0}
+.sheet label.f{display:block;font-weight:700;margin:14px 0 6px}
+.sheet input[type=text],.sheet input[type=number]{width:100%;min-height:50px;border-radius:14px;border:1px solid var(--line);background:var(--paper);padding:0 14px;font-size:18px}
+.presets{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.row2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.row2 input{flex:1;min-width:90px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;padding:3px;background:var(--paper);flex-wrap:wrap}
+.seg button{border:0;background:transparent;min-height:42px;padding:0 16px;border-radius:999px;font-weight:600}
+.seg button[aria-pressed="true"]{background:var(--rosemary);color:var(--paper)}
+.set-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.set-row .d{color:var(--muted);font-size:14.5px}
+.jump-list{list-style:none;margin:0;padding:0}
+.jump-list button{display:flex;width:100%;gap:12px;align-items:baseline;text-align:left;border:0;background:transparent;padding:12px 10px;border-radius:12px;font-size:17px;min-height:48px}
+.jump-list button.cur-j{background:var(--saffron-wash);font-weight:700}
+.jump-list .n{color:var(--muted);min-width:1.8em}
+.jump-list .tm{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+.jump-sec{font-family:var(--serif);font-weight:600;color:var(--rosemary);font-size:19px;margin:14px 10px 4px}
+.res-list{margin:6px 0;padding-left:1.2em}
+.res-list li{margin:3px 0}
+#toast{position:fixed;left:50%;bottom:calc(var(--safe-b) + 96px);transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none;width:min(560px,92vw)}
+.toast{pointer-events:auto;display:flex;align-items:center;gap:12px;padding:12px 14px 12px 18px;border-radius:18px;background:var(--rosemary);color:var(--paper);box-shadow:var(--shadow);font-weight:600}
+.toast button{border:0;background:rgba(255,255,255,.18);color:inherit;border-radius:999px;min-height:38px;padding:0 14px;font-weight:700}
+#alarm{position:fixed;top:calc(var(--safe-t) + 10px);left:50%;transform:translateX(-50%);z-index:70;width:min(640px,94vw)}
+.alarm{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 20px;border-radius:22px;background:var(--chilli);color:#fff;box-shadow:0 14px 40px rgba(0,0,0,.3)}
+.alarm .grow{flex:1;font-size:20px;font-weight:700}
+.alarm button{border:0;background:#fff;color:var(--chilli);border-radius:999px;min-height:52px;padding:0 22px;font-weight:700;font-size:18px}
+.hint{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin:0 0 8px;opacity:.9}
+</style>
+</head>
+<body>
+<div id="bg" aria-hidden="true"></div>
+<div id="app"></div>
+<div id="sheet-root"></div>
+<div id="alarm" role="alert" aria-live="assertive"></div>
+<div id="toast" aria-live="polite"></div>
+<input type="file" id="file-in" multiple hidden>
+<script>
+'use strict';
+/* =========================================================
+   Cook mode viewer. Single-file app; data lives in IndexedDB.
+   ========================================================= */
+const APP_VERSION = '1.0.0';
+const $ = (s, r = document) => r.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pad = n => String(n).padStart(2, '0');
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+function fmtClock(ms){ const t = Math.max(0, Math.round(ms / 1000)); const h = Math.floor(t / 3600), m = Math.floor(t % 3600 / 60), s = t % 60; return h ? `${h}:${pad(m)}:${pad(s)}` : `${m}:${pad(s)}`; }
+function fmtDur(sec){ sec = Math.round(sec); if (sec < 60) return `${sec} s`; const h = Math.floor(sec / 3600), m = Math.round(sec % 3600 / 60); if (h) return m ? `${h} h ${m} min` : `${h} h`;
+  if (sec < 600 && sec % 60) return `${Math.floor(sec / 60)} min ${sec % 60} s`; return `${Math.round(sec / 60)} min`; }
+function fmtRange(a, b){ if (!b) return fmtDur(a); if (b < 120) return `${a}–${b} s`; if (a % 60 === 0 && b % 60 === 0 && b < 3600) return `${a / 60}–${b / 60} min`; return `${fmtDur(a)} to ${fmtDur(b)}`; }
+function fmtMinutes(ms){ const m = ms / 60000; return m < 10 ? String(Math.round(m * 10) / 10) : String(Math.round(m)); }
+function dmy(iso){ if (!iso) return ''; const d = new Date(/^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso + 'T00:00:00' : iso); if (isNaN(d)) return String(iso); return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`; }
+function isoDate(d = new Date()){ return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`; }
+function isoLocal(d = new Date()){ const o = -d.getTimezoneOffset(), a = Math.abs(o); return `${isoDate(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}${o >= 0 ? '+' : '-'}${pad(Math.floor(a / 60))}:${pad(a % 60)}`; }
+function stamp(d = new Date()){ return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`; }
+const rid = (n = 4) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('');
+const slug = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'recipe';
+const isTouch = () => matchMedia('(pointer:coarse)').matches;
+const isWide = () => matchMedia('(min-width:820px)').matches;
+
+/* ---------- Icons ---------- */
+const I = {
+  back:'<svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>',
+  next:'<svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>',
+  pause:'<svg class="i f" viewBox="0 0 24 24"><rect x="6" y="5" width="4.2" height="14" rx="1.2"/><rect x="13.8" y="5" width="4.2" height="14" rx="1.2"/></svg>',
+  play:'<svg class="i f" viewBox="0 0 24 24"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>',
+  timer:'<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="13.5" r="7.5"/><path d="M12 9.5v4l2.5 2M9.5 2.5h5"/></svg>',
+  plus:'<svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>',
+  close:'<svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+  gear:'<svg class="i" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>',
+  import:'<svg class="i" viewBox="0 0 24 24"><path d="M12 3v11M7.5 9.5L12 14l4.5-4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>',
+  share:'<svg class="i" viewBox="0 0 24 24"><path d="M12 15V3M7.5 7.5L12 3l4.5 4.5M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6"/></svg>',
+  list:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  search:'<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
+  basket:'<svg class="i" viewBox="0 0 24 24"><path d="M4 10h16l-1.6 8.2a2 2 0 0 1-2 1.6H7.6a2 2 0 0 1-2-1.6zM8 10l3-6M16 10l-3-6"/></svg>',
+  paste:'<svg class="i" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h6"/></svg>',
+};
+
+/* ---------- Storage (IndexedDB with in-memory fallback) ---------- */
+const DB = {
+  db: null, mem: null,
+  open(){
+    return new Promise(res => {
+      const fallback = () => { this.mem = { recipes: new Map(), cooks: new Map(), kv: new Map() }; res(false); };
+      try {
+        const rq = indexedDB.open('cook-mode', 1);
+        rq.onupgradeneeded = () => { const d = rq.result; d.createObjectStore('recipes', { keyPath: 'id' }); d.createObjectStore('cooks', { keyPath: 'id' }); d.createObjectStore('kv'); };
+        rq.onsuccess = () => { this.db = rq.result; res(true); };
+        rq.onerror = fallback; rq.onblocked = fallback;
+      } catch (e) { fallback(); }
+    });
+  },
+  _tx(store, mode, fn){
+    return new Promise((res, rej) => {
+      const t = this.db.transaction(store, mode), s = t.objectStore(store); let out;
+      const r = fn(s); if (r && 'onsuccess' in r) r.onsuccess = () => { out = r.result; };
+      t.oncomplete = () => res(out); t.onerror = () => rej(t.error); t.onabort = () => rej(t.error);
+    });
+  },
+  all(store){ return this.mem ? Promise.resolve([...this.mem[store].values()]) : this._tx(store, 'readonly', s => s.getAll()); },
+  get(store, key){ return this.mem ? Promise.resolve(this.mem[store].get(key)) : this._tx(store, 'readonly', s => s.get(key)); },
+  put(store, val, key){ if (this.mem){ this.mem[store].set(key ?? val.id, val); return Promise.resolve(); } return this._tx(store, 'readwrite', s => key === undefined ? s.put(val) : s.put(val, key)); },
+  putMany(store, vals){ if (this.mem){ vals.forEach(v => this.mem[store].set(v.id, v)); return Promise.resolve(); } return this._tx(store, 'readwrite', s => { vals.forEach(v => s.put(v)); }); },
+  del(store, key){ if (this.mem){ this.mem[store].delete(key); return Promise.resolve(); } return this._tx(store, 'readwrite', s => s.delete(key)); },
+  clear(store){ if (this.mem){ this.mem[store].clear(); return Promise.resolve(); } return this._tx(store, 'readwrite', s => s.clear()); },
+};
+const safe = p => p.catch(e => { console.warn(e); toast('Could not save to this device. Storage may be full or blocked.'); });
+
+/* ---------- State ---------- */
+const DEFAULT_SETTINGS = { theme: 'auto', textSize: 1, tapZones: true, sound: true, wake: true, deviceName: '' };
+const S = { recipes: new Map(), cooks: new Map(), settings: { ...DEFAULT_SETTINGS }, session: null, lastExport: null, device: '', ix: new Map(), ui: { scales: {}, mise: {}, q: '', cat: '', savedCook: null, lastRouteKey: '' } };
+const deviceLabel = () => S.settings.deviceName.trim() || S.device;
+
+/* ---------- Quantities ---------- */
+const UF = {'¼':.25,'½':.5,'¾':.75,'⅐':1/7,'⅑':1/9,'⅒':.1,'⅓':1/3,'⅔':2/3,'⅕':.2,'⅖':.4,'⅗':.6,'⅘':.8,'⅙':1/6,'⅚':5/6,'⅛':.125,'⅜':.375,'⅝':.625,'⅞':.875};
+const UFC = Object.keys(UF).join('');
+const NUM_SRC = `(?:\\d+\\s+\\d+\\/\\d+|\\d+\\/\\d+|\\d*\\.?\\d+\\s?[${UFC}]|\\d+(?:\\.\\d+)?|[${UFC}])`;
+const NUM_RE = new RegExp(NUM_SRC, 'g');
+const NOSCALE_AFTER = /^\s*(?:cm\b|mm\b|°|degrees?\b|%|min\b|mins\b|minutes?\b|secs?\b|seconds?\b|s\b|h\b|hrs?\b|hours?\b|[x×]\s*\d|\/)/i;
+const METRIC_AFTER = /^\s*(kg|mg|g|grams?|ml|l|litres?|liters?)\b/i;
+const METRIC_UNIT = /^(kg|mg|g|ml|l|litres?|liters?|grams?)$/i;
+const FRACS = [[0,''],[1/8,'⅛'],[1/4,'¼'],[1/3,'⅓'],[3/8,'⅜'],[1/2,'½'],[5/8,'⅝'],[2/3,'⅔'],[3/4,'¾'],[7/8,'⅞'],[1,'']];
+function parseNum(t){
+  t = t.trim(); let m;
+  if ((m = t.match(/^(\d+)\s+(\d+)\/(\d+)$/))) return +m[1] + m[2] / m[3];
+  if ((m = t.match(/^(\d+)\/(\d+)$/))) return m[1] / m[2];
+  const last = t.slice(-1);
+  if (UF[last] !== undefined){ const w = t.slice(0, -1).trim(); return (w ? parseFloat(w) : 0) + UF[last]; }
+  return parseFloat(t);
+}
+const fmtDec = v => String(Math.round(v * 100) / 100);
+const SPOON = /^\s*(tsp|tbsp|teaspoons?|tablespoons?|cups?|c\b|pinch|pinches|dash)/i;
+const SPOON_FRACS = FRACS.filter(f => ![3/8, 5/8, 7/8].includes(f[0]));
+function fmtCount(v){
+  if (v >= 20) return String(Math.round(v));
+  const step = v < 1 ? 0.25 : 0.5; let x = Math.max(step, Math.round(v / step) * step);
+  const w = Math.floor(x), r = x - w; const fr = r === 0.25 ? '¼' : r === 0.5 ? '½' : r === 0.75 ? '¾' : '';
+  return (w ? String(w) : '') + fr;
+}
+function fmtFrac(v, kind){
+  if (kind === 'count') return fmtCount(v);
+  if (v >= 20) return String(Math.round(v));
+  if (v > 0 && v < 0.1) return fmtDec(v);
+  let w = Math.floor(v), r = v - w, best = FRACS[0];
+  const set = v < 0.5 ? FRACS : SPOON_FRACS;
+  for (const fr of set) if (Math.abs(fr[0] - r) < Math.abs(best[0] - r)) best = fr;
+  if (best[0] === 1){ w += 1; best = FRACS[0]; }
+  if (w === 0 && !best[1]) return fmtDec(v);
+  return (w ? String(w) : '') + best[1];
+}
+function fmtMetric(v, u){
+  const lu = String(u).toLowerCase();
+  if (lu === 'kg' || lu === 'l' || lu.startsWith('lit')) return String(Math.round(v * 100) / 100);
+  if (v < 10) return String(Math.round(v * 2) / 2);
+  if (v < 100) return String(Math.round(v));
+  if (v < 1000) return String(Math.round(v / 5) * 5);
+  return String(Math.round(v / 10) * 10);
+}
+const fmtQ = (v, unit) => unit && METRIC_UNIT.test(unit) ? fmtMetric(v, unit) : fmtFrac(v, unit && SPOON.test(unit) ? 'spoon' : 'count');
+function fmtAmount(q, qmax, unit, approx, f = 1){
+  if (q == null) return '';
+  let s = (approx ? '~' : '') + fmtQ(q * f, unit);
+  if (qmax != null) s += '–' + fmtQ(qmax * f, unit);
+  if (unit) s += ' ' + unit;
+  return s;
+}
+/* Scale every quantity in str between [start, end); returns HTML. */
+function scaleHTML(str, f, start = 0, end = Infinity){
+  let out = '', pos = 0, m; NUM_RE.lastIndex = 0;
+  while ((m = NUM_RE.exec(str))){
+    const i = m.index, tok = m[0];
+    if (i < start) continue; if (i >= end) break;
+    const after = str.slice(i + tok.length), before = str.slice(0, i);
+    if (NOSCALE_AFTER.test(after) || /[x×°\/]\s*$/.test(before) || /\d[.,]$/.test(before)) continue;
+    const v = parseNum(tok) * f, um = after.match(METRIC_AFTER);
+    const s = um ? fmtMetric(v, um[1]) : (tok.includes('.') ? fmtDec(v) : fmtFrac(v, SPOON.test(after) ? 'spoon' : 'count'));
+    out += esc(str.slice(pos, i)) + `<b class="sc">${esc(s)}</b>` + (/\s$/.test(tok) ? ' ' : '');
+    pos = i + tok.length;
+  }
+  return out + esc(str.slice(pos));
+}
+const LEAD_RE = new RegExp(`^\\s*(?:~|≈|about\\s+|approx\\.?\\s+)?(${NUM_SRC})(?:\\s*(?:–|-|to)\\s*(?:${NUM_SRC}))?`, 'i');
+const PAREN_RE = new RegExp(`^(?:\\s*[A-Za-z]+\\.?){0,3}\\s*\\(\\s*(?:~|≈)?\\s*(?:${NUM_SRC})[^)]*\\)`);
+const scaleOf = (it, f) => it && it.scale === false ? 1 : f;
+function ingHTML(it, f){
+  const raw = it.raw || [fmtAmount(it.qty, it.qty_max, it.unit, it.approx), it.name, it.prep].filter(Boolean).join(' ');
+  const sf = scaleOf(it, f);
+  if (sf === 1 || it.qty == null) return esc(raw);
+  const m = raw.match(LEAD_RE);
+  if (m && Math.abs(parseNum(m[1]) - it.qty) <= Math.max(0.02, it.qty * 0.02)){
+    let end = m[0].length; const p = raw.slice(end).match(PAREN_RE); if (p) end += p[0].length;
+    return scaleHTML(raw, sf, 0, end);
+  }
+  return `<b class="sc">${esc(fmtAmount(it.qty, it.qty_max, it.unit, it.approx, sf))}</b> ${esc(it.name)}${it.prep ? ', ' + esc(it.prep) : ''}<span class="orig">${esc(raw)}</span>`;
+}
+function useAmount(it, use, f){
+  const sf = scaleOf(it, f);
+  if (use && use.qty != null) return fmtAmount(use.qty, use.qty_max ?? null, use.unit ?? it.unit, false, sf);
+  if (it.qty == null) return '';
+  if (use && use.fraction) return fmtAmount(it.qty * use.fraction, it.qty_max != null ? it.qty_max * use.fraction : null, it.unit, it.approx, sf);
+  return fmtAmount(it.qty, it.qty_max, it.unit, it.approx, sf);
+}
+
+/* ---------- Recipe normalisation and index ---------- */
+function isRecipe(o){ return o && typeof o === 'object' && !Array.isArray(o) && Array.isArray(o.steps) && (o.title || o.id); }
+function normRecipe(src){
+  const r = JSON.parse(JSON.stringify(src));
+  r.title = r.title || r.id; r.id = r.id || slug(r.title);
+  r.ingredient_groups = (Array.isArray(r.ingredient_groups) ? r.ingredient_groups : []).map((g, gi) => ({ ...g, name: g.name || 'Ingredients',
+    items: (g.items || []).map((it, ii) => ({ qty: null, qty_max: null, unit: null, approx: false, prep: null, optional: false, scale: true, ...it, id: it.id || `ing_${gi}_${ii}`, name: it.name || it.raw || '' })) }));
+  r.steps = r.steps.map((s, i) => ({ ...s, id: s.id || `s${i + 1}`, title: s.title || '', text: s.text || '', section: s.section || null,
+    mentions: Array.isArray(s.mentions) ? s.mentions : [], uses: Array.isArray(s.uses) ? s.uses : [], substeps: Array.isArray(s.substeps) ? s.substeps : [],
+    timers: (Array.isArray(s.timers) ? s.timers : []).filter(t => t && t.seconds > 0), caution: s.caution || null }));
+  for (const k of ['tags','equipment','advance_prep','notes','other_versions','structure_changes','review_flags','related']) if (!Array.isArray(r[k])) r[k] = r[k] ? [r[k]] : [];
+  r.servings = r.servings && typeof r.servings === 'object' ? r.servings : { count: null, label: null };
+  r.scale_mode = r.servings.count ? (r.scale_mode || 'servings') : 'multiplier';
+  r.time = r.time || {}; r.source = r.source || {};
+  return r;
+}
+function buildIndex(r){
+  const items = new Map(), groups = new Map(), warnings = [];
+  r.ingredient_groups.forEach(g => { const arr = []; groups.set(g.name.toLowerCase(), arr);
+    g.items.forEach(it => { if (items.has(it.id)) warnings.push(`Ingredient id "${it.id}" is used twice.`); items.set(it.id, { item: it, group: g.name }); arr.push(it.id); }); });
+  const resolve = (ref, where) => {
+    if (ref.id){ if (items.has(ref.id)) return [ref.id]; warnings.push(`${where}: unknown ingredient id "${ref.id}".`); return []; }
+    if (ref.group){ const g = groups.get(String(ref.group).toLowerCase()); if (g) return g; warnings.push(`${where}: unknown ingredient group "${ref.group}".`); }
+    return [];
+  };
+  const seen = new Set();
+  const stepUse = r.steps.map((s, i) => {
+    const where = `Step ${s.id}`;
+    if (seen.has(s.id)) warnings.push(`Step id "${s.id}" is used twice.`); seen.add(s.id);
+    const set = new Set();
+    s.uses.forEach(u => resolve(u, where).forEach(id => set.add(id)));
+    s.mentions.forEach(m => {
+      const inText = m.phrase && (s.text.includes(m.phrase) || s.substeps.some(x => String(x).includes(m.phrase)));
+      if (!inText) warnings.push(`${where}: highlight phrase "${m.phrase}" is not in the step text.`);
+      else if (m.amount && !m.phrase.includes(m.amount)) warnings.push(`${where}: amount "${m.amount}" is not inside phrase "${m.phrase}".`);
+      resolve(m, where).forEach(id => set.add(id));
+    });
+    s.timers.forEach(t => { if (t.phrase && !s.text.includes(t.phrase)) warnings.push(`${where}: timer phrase "${t.phrase}" is not in the step text.`); });
+    return set;
+  });
+  return { items, groups, stepUse, warnings: [...new Set(warnings)] };
+}
+function getRecipe(id){ return S.recipes.get(id)?.data || null; }
+function getIx(r){ let ix = S.ix.get(r.id); if (!ix || ix.r !== r){ ix = buildIndex(r); ix.r = r; S.ix.set(r.id, ix); } return ix; }
+function yieldLabel(r, n){ const l = (r.servings.label || 'serves').trim(); return /^serv/i.test(l) ? `Serves ${n}` : `Makes ${n} ${l}`; }
+
+/* ---------- Scale state ---------- */
+const MULTS = [['½×', .5], ['1×', 1], ['1⅓×', 4 / 3], ['1½×', 1.5], ['2×', 2], ['3×', 3]];
+function getScale(r){
+  if (S.session && S.session.recipe_id === r.id) return { factor: S.session.factor, servings: S.session.servings };
+  return S.ui.scales[r.id] || { factor: 1, servings: r.scale_mode === 'servings' ? r.servings.count : null };
+}
+function setScale(r, sc){ if (S.session && S.session.recipe_id === r.id){ S.session.factor = sc.factor; S.session.servings = sc.servings; saveSession(); } else S.ui.scales[r.id] = sc; }
+function scalerHTML(r){
+  const sc = getScale(r);
+  if (r.scale_mode === 'servings'){
+    return `<div class="scaler"><span class="lbl">${esc(yieldLabel(r, sc.servings))}</span>
+      <span class="stepper" role="group" aria-label="Servings"><button data-act="serv" data-d="-1" aria-label="Fewer servings">−</button><output>${sc.servings}</output><button data-act="serv" data-d="1" aria-label="More servings">+</button></span></div>`;
+  }
+  return `<div class="scaler"><span class="lbl">Amount</span><span class="mults">${MULTS.map(([l, v]) => `<button class="chip" data-act="mult" data-v="${v}" aria-pressed="${Math.abs(sc.factor - v) < 1e-6}">${l}</button>`).join('')}</span></div>`;
+}
+
+/* ---------- Rich step text ---------- */
+function richText(text, mentions, timers, f, ix, opts = {}){
+  const ranges = [], free = (a, b) => !ranges.some(x => a < x.end && b > x.start);
+  mentions.forEach(m => { if (!m.phrase) return; let from = 0, i;
+    while ((i = text.indexOf(m.phrase, from)) !== -1){ if (free(i, i + m.phrase.length)){ ranges.push({ start: i, end: i + m.phrase.length, m }); break; } from = i + 1; } });
+  (timers || []).forEach((t, k) => { if (!t.phrase) return; const i = text.indexOf(t.phrase); if (i >= 0 && free(i, i + t.phrase.length)) ranges.push({ start: i, end: i + t.phrase.length, t: k }); });
+  ranges.sort((a, b) => a.start - b.start);
+  let out = '', pos = 0;
+  for (const x of ranges){
+    out += esc(text.slice(pos, x.start)); const seg = text.slice(x.start, x.end);
+    if (x.m) out += `<mark class="ing">${mentionHTML(seg, x.m, f, ix)}</mark>`;
+    else out += opts.timerButtons ? `<button class="tphrase" data-act="timer-step" data-i="${x.t}">${esc(seg)}</button>` : esc(seg);
+    pos = x.end;
+  }
+  return out + esc(text.slice(pos));
+}
+function mentionHTML(seg, m, f, ix){
+  if (!m.amount) return esc(seg);
+  const it = m.id ? ix.items.get(m.id)?.item : null;
+  const sf = it ? scaleOf(it, f) : (m.group ? f : 1);
+  if (sf === 1) return esc(seg);
+  const k = seg.indexOf(m.amount); if (k < 0) return esc(seg);
+  return esc(seg.slice(0, k)) + scaleHTML(m.amount, sf) + esc(seg.slice(k + m.amount.length));
+}
+function ingredientsHTML(r, f, states){
+  const single = r.ingredient_groups.length === 1 && /^ingredients$/i.test(r.ingredient_groups[0].name);
+  return r.ingredient_groups.map(g => `<div class="ing-group">${single ? '' : `<h4>${esc(g.name)}</h4>`}<ul>${g.items.map(it =>
+    `<li class="ing-row ${states ? (states.get(it.id) || '') : ''}" data-ing="${esc(it.id)}">${ingHTML(it, f)}</li>`).join('')}</ul></div>`).join('') || '<p class="muted">No ingredient list on this page.</p>';
+}
+
+/* ---------- Cook sequence and history ---------- */
+function seqFor(r, s){
+  const seq = [];
+  if (s.includeMise) seq.push({ key: 'mise', kind: 'mise', title: 'Mise en place' });
+  r.steps.forEach((st, i) => seq.push({ key: st.id, kind: 'step', step: st, si: i, title: st.title || `Step ${i + 1}` }));
+  seq.push({ key: 'cleanup', kind: 'cleanup', title: 'Clean up and store' });
+  return seq;
+}
+function sectionPos(r, si){
+  const st = r.steps[si], sec = st.section;
+  if (!sec) { const plain = r.steps.filter(x => !x.section); return { sec: null, n: plain.indexOf(st) + 1, of: plain.length }; }
+  let a = si; while (a > 0 && r.steps[a - 1].section === sec) a--;
+  let b = si; while (b < r.steps.length - 1 && r.steps[b + 1].section === sec) b++;
+  return { sec, n: si - a + 1, of: b - a + 1 };
+}
+function stepStats(recipeId, key){
+  const vals = [];
+  S.cooks.forEach(c => { if (c.recipe_id !== recipeId) return; const s = (c.steps || []).find(x => x.step_id === key); if (s && s.seconds > 0) vals.push(s.seconds); });
+  if (!vals.length) return null;
+  return { n: vals.length, avg: vals.reduce((a, b) => a + b, 0) / vals.length, min: Math.min(...vals) };
+}
+function cooksFor(id){ return [...S.cooks.values()].filter(c => c.recipe_id === id).sort((a, b) => String(b.started_at).localeCompare(String(a.started_at))); }
+function ingStates(ix, seq, idx){
+  const cur = seq[idx], st = new Map();
+  if (cur.kind === 'cleanup'){ ix.items.forEach((_, id) => st.set(id, 'done')); return st; }
+  if (cur.kind === 'mise') return st;
+  const at = new Map();
+  seq.forEach((e, k) => { if (e.kind === 'step') ix.stepUse[e.si].forEach(id => { if (!at.has(id)) at.set(id, []); at.get(id).push(k); }); });
+  at.forEach((ks, id) => { if (ks.includes(idx)) st.set(id, 'now'); else if (Math.max(...ks) < idx) st.set(id, 'done'); });
+  return st;
+}
+
+/* ---------- Session engine ---------- */
+let lastPersist = 0;
+function saveSession(){ lastPersist = Date.now(); if (S.session) safe(DB.put('kv', S.session, 'session')); else safe(DB.del('kv', 'session')); }
+function curKey(){ const s = S.session, r = s && getRecipe(s.recipe_id); if (!r) return null; const seq = seqFor(r, s); return seq[clamp(s.idx, 0, seq.length - 1)].key; }
+function flush(){
+  const s = S.session; if (!s) return; const now = Date.now();
+  if (s.running && !s.finished){ const k = curKey(); if (k) s.times[k] = (s.times[k] || 0) + (now - s.lastTick); }
+  s.lastTick = now;
+}
+function tick(){
+  if (!S.session) return;
+  flush(); checkTimers(Date.now()); updateLive();
+  if (Date.now() - lastPersist > 5000) saveSession();
+}
+setInterval(tick, 250);
+
+function startCook(r){
+  const sc = getScale(r);
+  const includeMise = !!(r.mise_en_place && r.mise_en_place.recommended) && (S.ui.mise[r.id] ?? true);
+  S.session = { recipe_id: r.id, started_at: isoLocal(), startedMs: Date.now(), factor: sc.factor, servings: sc.servings, includeMise,
+    idx: 0, times: {}, running: true, lastTick: Date.now(), timers: [], finished: false, finishedMs: null, miseDone: [], notes: '' };
+  saveSession(); unlockAudio(); go('#/cook');
+}
+function goStep(d){
+  const s = S.session, r = s && getRecipe(s.recipe_id); if (!r) return;
+  const seq = seqFor(r, s); const n = clamp(s.idx + d, 0, seq.length - 1);
+  if (n === s.idx) return;
+  flush(); s.idx = n; saveSession(); renderCook(true);
+}
+function jumpTo(i){ const s = S.session; flush(); s.idx = i; saveSession(); closeSheet(); renderCook(true); }
+function swToggle(){ const s = S.session; flush(); s.running = !s.running; s.lastTick = Date.now(); saveSession(); updateLive(true); }
+function swAdjust(d){ const s = S.session; flush(); const k = curKey(); s.times[k] = Math.max(0, (s.times[k] || 0) + d * 60000); saveSession(); updateLive(true); }
+function finishCook(){ const s = S.session; flush(); s.running = false; s.finished = true; s.finishedMs = Date.now(); saveSession(); go('#/done'); }
+
+/* ---------- Countdown timers ---------- */
+function addTimer(label, ms, maxMs, src){
+  const s = S.session; if (!s) return;
+  s.timers.push({ id: rid(5), label, dur: ms, max: maxMs || null, endAt: Date.now() + ms, remain: ms, state: 'running', src: src || null });
+  unlockAudio(); saveSession(); renderTray(); refreshTimerChips();
+}
+function timerAction(id, what){
+  const s = S.session; const t = s && s.timers.find(x => x.id === id); if (!t) return;
+  const now = Date.now();
+  if (what === 'toggle'){
+    if (t.state === 'running'){ t.remain = Math.max(0, t.endAt - now); t.state = 'paused'; }
+    else if (t.state === 'paused'){ t.endAt = now + t.remain; t.state = 'running'; }
+    else if (t.state === 'done'){ removeTimer(id); return; }
+  } else if (what === 'plus'){
+    if (t.state === 'running') t.endAt += 60000; else if (t.state === 'paused') t.remain += 60000;
+    else { t.state = 'running'; t.endAt = now + 60000; ringing.delete(id); renderAlarm(); }
+  } else if (what === 'remove'){ removeTimer(id); return; }
+  saveSession(); renderTray(); refreshTimerChips();
+}
+function removeTimer(id){ const s = S.session; s.timers = s.timers.filter(x => x.id !== id); ringing.delete(id); saveSession(); renderAlarm(); renderTray(); refreshTimerChips(); }
+function checkTimers(now){
+  const s = S.session; let changed = false;
+  for (const t of s.timers) if (t.state === 'running' && now >= t.endAt){ t.state = 'done'; ringing.add(t.id); changed = true; }
+  if (changed){ saveSession(); renderTray(); refreshTimerChips(); renderAlarm(); startRinging(); }
+}
+const ringing = new Set(); let ringLoop = null;
+function startRinging(){ if (ringLoop || !ringing.size) return; const ring = () => { if (!ringing.size){ clearInterval(ringLoop); ringLoop = null; return; } beep(); if (navigator.vibrate) navigator.vibrate([250, 120, 250]); }; ring(); ringLoop = setInterval(ring, 1600); }
+function stopAlarm(){ [...ringing].forEach(id => { const s = S.session; if (s) s.timers = s.timers.filter(x => x.id !== id); }); ringing.clear(); if (ringLoop){ clearInterval(ringLoop); ringLoop = null; } saveSession(); renderAlarm(); renderTray(); refreshTimerChips(); }
+function renderAlarm(){
+  const el = $('#alarm'); const s = S.session;
+  const labels = s ? s.timers.filter(t => ringing.has(t.id)).map(t => t.label) : [];
+  el.innerHTML = labels.length ? `<div class="alarm"><span class="grow">${esc(labels.join(', '))} ${labels.length > 1 ? 'are' : 'is'} done</span><button data-act="alarm-stop">Stop alarm</button></div>` : '';
+}
+
+/* ---------- Audio and wake lock ---------- */
+let AC = null;
+function unlockAudio(){
+  try {
+    if (!AC){ const C = window.AudioContext || window.webkitAudioContext; if (!C) return; AC = new C(); }
+    if (AC.state === 'suspended') AC.resume();
+    const b = AC.createBuffer(1, 1, 22050), src = AC.createBufferSource(); src.buffer = b; src.connect(AC.destination); src.start(0);
+  } catch (e) {}
+}
+function beep(){
+  if (!S.settings.sound || !AC) return;
+  try {
+    if (AC.state === 'suspended') AC.resume();
+    const t0 = AC.currentTime + 0.02;
+    [[0, 880], [0.24, 880], [0.48, 1175]].forEach(([dt, hz]) => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine'; o.frequency.value = hz;
+      g.gain.setValueAtTime(0.0001, t0 + dt); g.gain.exponentialRampToValueAtTime(0.6, t0 + dt + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dt + 0.2);
+      o.connect(g).connect(AC.destination); o.start(t0 + dt); o.stop(t0 + dt + 0.22);
+    });
+  } catch (e) {}
+}
+document.addEventListener('pointerdown', () => { if (AC && AC.state === 'suspended') AC.resume(); }, { passive: true });
+let WL = null;
+async function wakeOn(){ if (!S.settings.wake || !('wakeLock' in navigator) || WL || document.visibilityState !== 'visible') return; try { WL = await navigator.wakeLock.request('screen'); WL.addEventListener('release', () => { WL = null; }); } catch (e) {} }
+function wakeOff(){ if (WL){ WL.release().catch(() => {}); WL = null; } }
+function syncWake(){ if (S.session && !S.session.finished) wakeOn(); else wakeOff(); }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible'){ syncWake(); tick(); } else if (S.session){ flush(); saveSession(); } });
+
+/* ---------- Toasts, sheets, confirm ---------- */
+function toast(msg, action, ms = 3500){
+  const el = document.createElement('div'); el.className = 'toast';
+  el.innerHTML = `<span>${esc(msg)}</span>${action ? `<button>${esc(action.label)}</button>` : ''}`;
+  if (action) el.querySelector('button').onclick = () => { action.fn(); el.remove(); };
+  $('#toast').appendChild(el); setTimeout(() => el.remove(), action ? Math.max(ms, 8000) : ms);
+}
+function openSheet(title, body, opts = {}){
+  const name = opts.name || title, existing = $('#sheet-root .sheet-b');
+  if (existing && S.ui.sheet === name){ existing.innerHTML = body; return; }
+  $('#sheet-root').innerHTML = `<div class="sheet-wrap"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="sheet-h"><h2>${esc(title)}</h2><button class="icon-btn" data-act="sheet-close" aria-label="Close">${I.close}</button></div><div class="sheet-b">${body}</div></div></div>`;
+  S.ui.sheet = name;
+  const f = $('#sheet-root [autofocus]'); if (f && !isTouch()) f.focus();
+}
+function closeSheet(){ $('#sheet-root').innerHTML = ''; S.ui.sheet = null; }
+function ask(msg, ok = 'OK', danger = false){
+  return new Promise(res => {
+    openSheet('Please confirm', `<p style="font-size:18px">${esc(msg)}</p><div class="actions"><button class="btn ${danger ? 'danger' : 'primary'}" id="ask-ok">${esc(ok)}</button><button class="btn" id="ask-no">Cancel</button></div>`, { name: 'ask' });
+    $('#ask-ok').onclick = () => { closeSheet(); res(true); };
+    $('#ask-no').onclick = () => { closeSheet(); res(false); };
+  });
+}
+
+/* ---------- Router ---------- */
+function route(){ const h = location.hash || '#/'; if (h.startsWith('#/r/')) return { v: 'recipe', id: decodeURIComponent(h.slice(4)) }; if (h === '#/cook') return { v: 'cook' }; if (h === '#/done') return { v: 'done' }; return { v: 'lib' }; }
+function go(h){ if (location.hash === h) render(); else location.hash = h; }
+window.addEventListener('hashchange', () => { closeSheet(); render(); });
+function render(){
+  const rt = route(), key = rt.v + (rt.id || '');
+  const app = $('#app');
+  if (rt.v === 'cook') { if (!S.session || S.session.finished || !getRecipe(S.session.recipe_id)) { go(S.session && S.session.finished ? '#/done' : '#/'); return; } renderCook(true); }
+  else if (rt.v === 'done') app.innerHTML = viewDone();
+  else if (rt.v === 'recipe') app.innerHTML = viewRecipe(rt.id);
+  else { app.innerHTML = viewLibrary(); renderLibList(); }
+  if (S.ui.lastRouteKey !== key){ window.scrollTo(0, 0); S.ui.lastRouteKey = key; }
+  syncWake(); renderAlarm();
+}
+
+/* ---------- Library ---------- */
+function unsavedCount(){ let n = 0; S.cooks.forEach(c => { if (c.device_id === S.device && (!S.lastExport || String(c.saved_at) > S.lastExport)) n++; }); return n; }
+function viewLibrary(){
+  const n = S.recipes.size, un = unsavedCount();
+  const cats = [...new Set([...S.recipes.values()].map(x => x.data.category).filter(Boolean))].sort();
+  let resume = '';
+  if (S.session){ const r = getRecipe(S.session.recipe_id);
+    if (r){ const seq = seqFor(r, S.session); const e = seq[clamp(S.session.idx, 0, seq.length - 1)];
+      resume = `<div class="banner glass"><div class="grow"><span class="muted">${S.session.finished ? 'Cook finished, not saved yet' : 'Cooking now'}</span><b>${esc(r.title)}</b><span class="muted">${esc(e.title)}</span></div>
+        <button class="btn primary" data-act="resume">${S.session.finished ? 'Review and save' : 'Resume cooking'}</button></div>`; } }
+  const actions = `<div class="lib-actions">
+      <button class="btn" data-act="import">${I.import}<span class="lbl">Import</span></button>
+      <button class="btn" data-act="export-log">${I.share}<span class="lbl">Save records</span>${un ? `<span class="badge" aria-label="${un} unsaved">${un}</span>` : ''}</button>
+      <button class="icon-btn" data-act="settings" aria-label="Settings">${I.gear}</button></div>`;
+  if (!n) return `<div class="page"><header class="lib-head"><div><h1 class="display">Recipes</h1></div>${actions}</header>${resume}
+    <div class="empty glass"><h2>No recipes on this device yet</h2><p>Import your recipes file from OneDrive, or paste the JSON the converter gave you.</p>
+    <div class="row"><button class="btn primary big" data-act="import">${I.import} Import recipes</button><button class="btn big" data-act="paste">${I.paste} Paste JSON</button></div></div></div>`;
+  return `<div class="page"><header class="lib-head"><div><h1 class="display">Recipes</h1><div class="count muted">${n} recipe${n === 1 ? '' : 's'} on this device</div></div>${actions}</header>
+    ${resume}
+    <label class="search glass">${I.search}<span class="sr">Search recipes</span><input type="search" placeholder="Search by name or ingredient" value="${esc(S.ui.q)}" data-input="q" autocomplete="off"></label>
+    ${cats.length > 1 ? `<div class="cats" role="group" aria-label="Category"><button class="chip" data-act="cat" data-v="" aria-pressed="${!S.ui.cat}">All</button>${cats.map(c => `<button class="chip" data-act="cat" data-v="${esc(c)}" aria-pressed="${S.ui.cat === c}">${esc(c)}</button>`).join('')}</div>` : ''}
+    <div id="lib-list"></div></div>`;
+}
+function renderLibList(){
+  const el = $('#lib-list'); if (!el) return;
+  const q = S.ui.q.trim().toLowerCase();
+  let list = [...S.recipes.values()].map(x => x.data);
+  if (S.ui.cat) list = list.filter(r => r.category === S.ui.cat);
+  if (q) list = list.filter(r => r.title.toLowerCase().includes(q) || r.ingredient_groups.some(g => g.items.some(it => String(it.name).toLowerCase().includes(q) || String(it.raw).toLowerCase().includes(q))));
+  if (!list.length){ el.innerHTML = `<p class="muted" style="font-size:18px;margin:24px 4px">No recipes match “${esc(S.ui.q)}”.</p>`; return; }
+  const by = new Map(); list.forEach(r => { const c = r.category || 'Other'; if (!by.has(c)) by.set(c, []); by.get(c).push(r); });
+  const cats = [...by.keys()].sort((a, b) => a === 'Other' ? 1 : b === 'Other' ? -1 : a.localeCompare(b));
+  const lone = cats.length === 1 && cats[0] === 'Other';
+  el.innerHTML = cats.map(c => `${lone ? '' : `<h2 class="group-h">${esc(c)}</h2>`}<div class="rgrid">${by.get(c).sort((a, b) => a.title.localeCompare(b.title)).map(card).join('')}</div>`).join('');
+}
+function card(r){
+  const cs = cooksFor(r.id), meta = [];
+  if (r.servings.count) meta.push(yieldLabel(r, r.servings.count));
+  if (r.time.per_serving_min != null) meta.push(`${r.time.per_serving_min} min per serving`);
+  if (r.cost_per_serving != null) meta.push(`$${Number(r.cost_per_serving).toFixed(2)} per serving`);
+  return `<a class="rcard glass" href="#/r/${encodeURIComponent(r.id)}"><span class="t">${esc(r.title)}</span>
+    <span class="meta">${meta.map(m => `<span>${esc(m)}</span>`).join('')}</span>
+    <span class="hist">${cs.length ? `Cooked ${cs.length} time${cs.length === 1 ? '' : 's'}, last on ${dmy(cs[0].started_at)}` : 'Not cooked with this app yet'}</span></a>`;
+}
+
+/* ---------- Recipe overview ---------- */
+function viewRecipe(id){
+  const r = getRecipe(id);
+  if (!r) return `<div class="page"><div class="topline"><a class="btn" href="#/">${I.back} Recipes</a></div><div class="empty glass"><h2>Recipe not found</h2><p>It may have been deleted on this device. Import it again from OneDrive.</p></div></div>`;
+  const ix = getIx(r), sc = getScale(r), f = sc.factor, cs = cooksFor(r.id), rec = S.recipes.get(id);
+  const facts = [];
+  if (r.servings.count) facts.push([yieldLabel(r, r.servings.count).replace(/^Serves /, ''), /^serv/i.test(r.servings.label || 'serves') ? 'servings' : '']);
+  if (r.time.per_serving_min != null) facts.push([`${r.time.per_serving_min} min`, 'per serving (your note)']);
+  if (r.cost_per_serving != null) facts.push([`$${Number(r.cost_per_serving).toFixed(2)}`, 'per serving']);
+  if (r.time.elapsed_min != null) facts.push([`${r.time.elapsed_min} min`, 'start to finish']);
+  if (r.time.active_min != null) facts.push([`${r.time.active_min} min`, 'hands-on']);
+  if (cs.length){ const avg = cs.reduce((a, c) => a + (c.per_serving_min || 0), 0) / cs.filter(c => c.per_serving_min).length; if (avg) facts.push([`${fmtMinutes(avg * 60000)} min`, `per serving, measured (${cs.length} cook${cs.length === 1 ? '' : 's'})`]); }
+  const mise = r.mise_en_place;
+  const sameSession = S.session && S.session.recipe_id === r.id;
+  const startBtn = sameSession ? `<button class="btn primary big" data-act="resume">${I.play} Resume cooking</button>` : `<button class="btn primary big" data-act="start" data-id="${esc(r.id)}">${I.play} Start cooking</button>`;
+  const miseToggle = mise && mise.recommended && !sameSession ? `<label class="switch"><input type="checkbox" data-input="mise" ${S.ui.mise[r.id] ?? true ? 'checked' : ''}><span>Start with mise en place</span></label>` : '';
+  let methodHTML = '', lastSec = Symbol();
+  r.steps.forEach((st, i) => {
+    if (st.section !== lastSec){ if (i) methodHTML += '</ol>'; methodHTML += `${st.section ? `<h3>${esc(st.section)}</h3>` : ''}<ol>`; lastSec = st.section; }
+    const ss = stepStats(r.id, st.id);
+    methodHTML += `<li>${st.title ? `<div class="mt">${esc(st.title)}</div>` : ''}<div>${richText(st.text, st.mentions, st.timers, f, ix)}</div>
+      ${st.substeps.length ? `<ul class="subs">${st.substeps.map(x => `<li>${richText(String(x), st.mentions, [], f, ix)}</li>`).join('')}</ul>` : ''}
+      ${st.caution ? `<div class="caution">${esc(st.caution)}</div>` : ''}
+      ${ss ? `<div class="avg">Average ${fmtClock(ss.avg * 1000)}, fastest ${fmtClock(ss.min * 1000)}</div>` : ''}</li>`;
+  });
+  if (r.steps.length) methodHTML += '</ol>';
+  const warnings = [...(r.review_flags || []), ...(rec.warnings || [])];
+  const nut = r.nutrition ? (Array.isArray(r.nutrition) ? r.nutrition : [r.nutrition]) : [];
+  const srcBits = [];
+  if (r.source.page_date) srcBits.push(`OneNote page dated ${dmy(r.source.page_date)}`);
+  if (r.source.adapted_from) srcBits.push(`Adapted from ${esc(r.source.adapted_from)}`);
+  return `<div class="page">
+    <div class="topline"><a class="btn" href="#/">${I.back} Recipes</a><span class="grow"></span><button class="btn quiet danger" data-act="del-recipe" data-id="${esc(r.id)}">Delete</button></div>
+    <div class="r-hero"><h1>${esc(r.title)}</h1><div class="sub">${[r.category, r.version ? `Version ${r.version}` : '', ...(r.tags || [])].filter(Boolean).map(esc).join(', ')}</div>
+      ${facts.length ? `<div class="facts">${facts.map(([b, l]) => `<div class="fact"><b>${esc(b)}</b>${esc(l)}</div>`).join('')}</div>` : ''}</div>
+    <div class="start-row">${startBtn}${miseToggle}</div>
+    ${r.advance_prep.length ? `<section class="card glass ahead"><h2>Plan ahead</h2><ul>${r.advance_prep.map(a => `<li>${esc(a.task || a)}${a.lead_time ? ` <span class="muted">(${esc(a.lead_time)})</span>` : ''}</li>`).join('')}</ul></section>` : ''}
+    ${mise ? `<section class="card glass"><h2>Mise en place</h2><p>${mise.recommended ? 'Recommended' : 'Not needed'}${mise.reason ? `: ${esc(mise.reason)}` : ''}</p>${mise.recommended && mise.tasks && mise.tasks.length ? `<ul>${mise.tasks.map(t => `<li>${esc(t)}</li>`).join('')}</ul>` : ''}</section>` : ''}
+    <div class="two-col">
+      <section class="card glass sticky"><h2>Ingredients</h2>${scalerHTML(r)}<div id="ov-ings">${ingredientsHTML(r, f)}</div>
+        ${r.equipment.length ? `<h3>Equipment</h3><ul>${r.equipment.map(e => `<li>${esc(e)}</li>`).join('')}</ul>` : ''}</section>
+      <section class="card glass method"><h2>Method</h2>${methodHTML || '<p class="muted">No method on this page.</p>'}</section>
+    </div>
+    ${r.notes.length ? `<section class="card glass"><h2>Notes</h2>${r.notes.map(n => `<p>${esc(n)}</p>`).join('')}</section>` : ''}
+    ${r.storage ? `<section class="card glass"><h2>Storage</h2><p class="pre">${esc(r.storage)}</p></section>` : ''}
+    ${nut.map(p => nutritionHTML(p)).join('')}
+    ${r.related.length ? `<section class="card glass"><h2>Goes with</h2><ul>${r.related.map(x => { const t = x.title || x.id || x; const rr = x.id && getRecipe(x.id); return `<li>${rr ? `<a href="#/r/${encodeURIComponent(x.id)}">${esc(t)}</a>` : `${esc(t)} <span class="muted">(not imported)</span>`}</li>`; }).join('')}</ul></section>` : ''}
+    ${r.other_versions.length ? `<section class="card glass"><h2>Other versions on the page</h2><ul>${r.other_versions.map(v => `<li>${esc(v)}</li>`).join('')}</ul></section>` : ''}
+    ${cs.length ? `<section class="card glass"><h2>Cook history</h2>${cs.map(c => `<div class="hist-row"><span class="grow"><b>${dmy(c.started_at)}</b> <span class="muted">${c.servings ? `${c.servings} servings` : `${fmtDec(c.scale_factor || 1)}×`}${c.device ? `, ${esc(c.device)}` : ''}</span>${c.notes ? `<br><span class="muted">${esc(c.notes)}</span>` : ''}</span>
+      <span>${fmtMinutes((c.active_seconds || 0) * 1000)} min active${c.per_serving_min ? `, ${fmtMinutes(c.per_serving_min * 60000)} min per serving` : ''}</span><button class="btn quiet danger" data-act="del-cook" data-id="${esc(c.id)}">Delete</button></div>`).join('')}</section>` : ''}
+    ${(srcBits.length || (r.source.links || []).length) ? `<section class="card glass"><h2>Source</h2>${srcBits.map(b => `<p>${b}</p>`).join('')}${(r.source.links || []).map(l => `<p><a href="${esc(l)}" target="_blank" rel="noopener">${esc(l)}</a></p>`).join('')}</section>` : ''}
+    <section class="card glass"><details class="conv"><summary>Conversion notes (${warnings.length + r.structure_changes.length})</summary>
+      ${r.structure_changes.length ? `<h3>Structure changes</h3><ul>${r.structure_changes.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+      ${warnings.length ? `<h3>Things to check</h3><ul>${warnings.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '<p class="muted">Nothing flagged.</p>'}
+      <p class="muted">Converted ${r.converted_on ? dmy(r.converted_on) : 'on an unknown date'}. Imported ${dmy(rec.imported_at)}${rec.file ? ` from ${esc(rec.file)}` : ''}.</p></details></section>
+  </div>`;
+}
+function nutritionHTML(p){
+  if (!p || !Array.isArray(p.rows) || !p.rows.length) return '';
+  const cols = []; p.rows.forEach(row => Object.keys(row).forEach(k => { if (!cols.includes(k)) cols.push(k); }));
+  const head = k => k === 'nutrient' ? 'Nutrient' : k.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase());
+  return `<section class="card glass"><h2>${esc(p.title || 'Nutrition')}</h2>${p.basis ? `<p class="muted">${esc(p.basis)}</p>` : ''}
+    <div class="scroll-x"><table class="nut"><thead><tr>${cols.map(c => `<th>${esc(head(c))}</th>`).join('')}</tr></thead><tbody>${p.rows.map(row => `<tr>${cols.map(c => `<td>${esc(row[c] ?? '')}</td>`).join('')}</tr>`).join('')}</tbody></table></div>
+    ${[].concat(p.notes || []).map(n => `<p class="muted">${esc(n)}</p>`).join('')}</section>`;
+}
+
+/* ---------- Cook view ---------- */
+function renderCook(full){
+  const s = S.session, r = getRecipe(s.recipe_id), ix = getIx(r);
+  const seq = seqFor(r, s); s.idx = clamp(s.idx, 0, seq.length - 1);
+  const cur = seq[s.idx], f = s.factor, states = ingStates(ix, seq, s.idx);
+  const pct = seq.length > 1 ? (s.idx / (seq.length - 1)) * 100 : 100;
+  let pos;
+  if (cur.kind === 'step'){ const p = sectionPos(r, cur.si); pos = p.sec ? `${p.sec}, step ${p.n} of ${p.of}` : `Step ${p.n} of ${p.of}`; }
+  else pos = cur.kind === 'mise' ? 'Before you cook' : 'Last step';
+  const posShort = `${s.idx + 1} of ${seq.length}`;
+  const prev = s.idx > 0 ? seq[s.idx - 1] : null;
+  const ups = seq.slice(s.idx + 1, s.idx + 6);
+  const last = s.idx === seq.length - 1;
+  const nextLabel = last ? 'Finish cook' : (seq[s.idx + 1].kind === 'cleanup' ? 'Clean up' : 'Next step');
+  const html = `<div class="cook">
+    <header class="cook-bar glass">
+      <a class="btn quiet cb-back" href="#/r/${encodeURIComponent(r.id)}" aria-label="Back to recipe">${I.back}<span class="lbl">Recipe</span></a>
+      <div class="cb-title"><div class="rt">${esc(r.title)}</div><button class="cb-pos" data-act="jump" aria-label="All steps, ${esc(pos)}">${I.list}<span class="long">${esc(pos)}</span><span class="short">${esc(posShort)}</span></button></div>
+      <div class="sw ${s.running ? '' : 'paused'}" id="sw">
+        <button class="sw-adj" data-act="sw-adj" data-d="-1" aria-label="Take 1 minute off this step">−1</button>
+        <button class="sw-main" data-act="sw-toggle" aria-label="${s.running ? 'Pause stopwatch' : 'Resume stopwatch'}"><span id="sw-icon">${s.running ? I.pause : I.play}</span><span class="sw-total" id="sw-total">0:00</span><span class="sw-sub"><span id="sw-step">0:00</span><span class="lbl"> ${s.running ? 'this step' : 'paused'}</span></span></button>
+        <button class="sw-adj" data-act="sw-adj" data-d="1" aria-label="Add 1 minute to this step">+1</button>
+      </div>
+    </header>
+    <div class="progress" aria-hidden="true"><i style="width:${pct}%"></i></div>
+    <div class="cook-body">
+      <aside class="cook-side glass" id="side" aria-label="Ingredients">${scalerHTML(r)}<div id="side-ings">${ingredientsHTML(r, f, states)}</div></aside>
+      <main class="stage" id="stage"><div class="stem">
+        ${S.settings.tapZones && s.idx === 0 && !(S.cooks.size) ? `<div class="hint"><span>Tap left side to go back</span><span>Tap right side for next step</span></div>` : ''}
+        ${prev ? `<div class="prev node past"><div class="pt">${esc(prev.title)}</div><div class="px">${esc(seqText(prev, r))}</div></div>` : ''}
+        ${curHTML(r, ix, cur, f, pos)}
+        ${ups.map((u, k) => { const ss = stepStats(r.id, u.key); return `<div class="up node u${k}"><div class="ut">${esc(u.title)}</div><div class="ux">${esc(seqText(u, r))}</div>${ss ? `<div class="ua">Usually about ${fmtDur(ss.avg)}</div>` : ''}</div>`; }).join('')}
+      </div></main>
+    </div>
+    <footer class="cook-foot glass">
+      <button class="btn drawer-btn" data-act="drawer">${I.basket} Ingredients</button>
+      <div class="tray" id="tray"></div>
+      <div class="nav">
+        <button class="btn" data-act="prev" ${s.idx === 0 ? 'disabled' : ''} aria-label="Previous step">${I.back}</button>
+        <button class="btn primary next" data-act="${last ? 'finish' : 'next'}">${esc(nextLabel)} ${last ? '' : I.next}</button>
+      </div>
+    </footer></div>`;
+  $('#app').innerHTML = html;
+  renderTray(); updateLive(true);
+  if (full){
+    const st = $('#stage'); if (st) st.scrollTop = 0;
+    const side = $('#side'), n = side && side.querySelector('.ing-row.now');
+    if (n){ const top = n.offsetTop - side.offsetTop - 60; side.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
+  }
+  if (S.ui.sheet === 'drawer') openDrawer();
+}
+function seqText(e, r){ if (e.kind === 'step') return e.step.text || e.step.substeps.join(' '); if (e.kind === 'mise') return (r.mise_en_place && r.mise_en_place.reason) || 'Prep everything before you start cooking.'; return 'Wash up, portion and store leftovers.'; }
+function curHTML(r, ix, cur, f, pos){
+  const ss = stepStats(r.id, cur.key);
+  const stats = `<div class="stepstats"><span>This step <b id="sw-step2">0:00</b></span>${ss ? `<span>Average <b>${fmtClock(ss.avg * 1000)}</b></span><span>Fastest <b>${fmtClock(ss.min * 1000)}</b></span>` : ''}</div>`;
+  if (cur.kind === 'mise'){
+    const m = r.mise_en_place || {}; const done = new Set(S.session.miseDone);
+    return `<section class="cur glass node"><div class="cur-pos">${esc(pos)}</div><h2 class="cur-title">Mise en place</h2>
+      <p class="step-text" style="font-size:calc(20px * var(--step-scale))">${esc(m.reason || 'Prep everything before you start cooking.')}</p>
+      <ul class="mise-list">${(m.tasks || []).map((t, i) => `<li><label><input type="checkbox" data-input="mise-task" data-i="${i}" ${done.has(i) ? 'checked' : ''}><span>${esc(t)}</span></label></li>`).join('')}</ul>${stats}</section>`;
+  }
+  if (cur.kind === 'cleanup'){
+    return `<section class="cur glass node"><div class="cur-pos">${esc(pos)}</div><h2 class="cur-title">Clean up and store</h2>
+      <p class="step-text">Wash up, portion and store leftovers. This time counts toward your time per serving.</p>
+      ${r.storage ? `<p class="pre" style="font-size:calc(20px * var(--step-scale));margin-top:14px"><b>Storage</b><br>${esc(r.storage)}</p>` : ''}${stats}</section>`;
+  }
+  const st = cur.step;
+  const strip = stripHTML(st, cur.si, ix, f);
+  const running = new Map(); (S.session.timers || []).forEach(t => { if (t.src && t.src.startsWith(st.id + ':')) running.set(+t.src.split(':')[1], t); });
+  return `<section class="cur glass node"><div class="cur-pos">${esc(pos)}</div>
+    <h2 class="cur-title ${st.title_generated ? 'gen' : ''}">${esc(cur.title)}</h2>
+    ${strip}
+    ${st.text ? `<p class="step-text">${richText(st.text, st.mentions, st.timers, f, ix, { timerButtons: true })}</p>` : ''}
+    ${st.substeps.length ? `<ul class="subs">${st.substeps.map(x => `<li>${richText(String(x), st.mentions, [], f, ix)}</li>`).join('')}</ul>` : ''}
+    ${st.caution ? `<div class="caution">${esc(st.caution)}</div>` : ''}
+    ${st.timers.length ? `<div class="tchips" id="tchips">${st.timers.map((t, i) => tchip(t, i, running.get(i))).join('')}</div>` : ''}
+    ${stats}</section>`;
+}
+function tchip(t, i, run){
+  const d = fmtRange(t.seconds, t.max_seconds);
+  if (run) return `<button class="tchip running" data-act="timer-step" data-i="${i}">${I.timer} ${esc(t.label || 'Timer')} running</button>`;
+  return `<button class="tchip" data-act="timer-step" data-i="${i}">${I.play} ${esc(t.label || 'Timer')} ${esc(d)}</button>`;
+}
+function refreshTimerChips(){
+  const box = $('#tchips'); if (!box || !S.session) return;
+  const r = getRecipe(S.session.recipe_id), seq = seqFor(r, S.session), cur = seq[S.session.idx]; if (cur.kind !== 'step') return;
+  const running = new Map(); S.session.timers.forEach(t => { if (t.src && t.src.startsWith(cur.step.id + ':')) running.set(+t.src.split(':')[1], t); });
+  box.innerHTML = cur.step.timers.map((t, i) => tchip(t, i, running.get(i))).join('');
+}
+function stripHTML(st, si, ix, f){
+  const seen = new Set(), chips = [];
+  const add = (id, use) => { if (seen.has(id)) return; seen.add(id); const it = ix.items.get(id)?.item; if (!it) return; const a = useAmount(it, use, f); chips.push(`<span class="schip">${a ? `<b>${esc(a)}</b>` : ''}${esc(it.name)}</span>`); };
+  st.uses.forEach(u => { if (u.id) add(u.id, u); else if (u.group) (ix.groups.get(String(u.group).toLowerCase()) || []).forEach(id => add(id, u.fraction ? { fraction: u.fraction } : null)); });
+  ix.stepUse[si].forEach(id => add(id, null));
+  return chips.length ? `<div class="strip" aria-label="Ingredients for this step">${chips.join('')}</div>` : '';
+}
+function trayHTML(){
+  const s = S.session, now = Date.now();
+  return s.timers.map(t => {
+    const left = t.state === 'running' ? t.endAt - now : t.remain;
+    return `<div class="pill ${t.state}" data-tid="${t.id}"><button class="pl-btn" data-act="t-toggle" data-id="${t.id}" aria-label="${t.state === 'running' ? 'Pause' : t.state === 'paused' ? 'Resume' : 'Dismiss'} ${esc(t.label)}">
+      <span class="pl">${esc(t.label)}</span><span class="pt" data-left>${t.state === 'done' ? 'Done' : fmtClock(left)}</span></button>
+      <button data-act="t-plus" data-id="${t.id}" aria-label="Add 1 minute">+1</button><button data-act="t-remove" data-id="${t.id}" aria-label="Remove timer">${I.close}</button></div>`;
+  }).join('') + `<button class="pill add" data-act="timer-new">${I.plus} Timer</button>`;
+}
+function renderTray(){ const el = $('#tray'); if (el && S.session) el.innerHTML = trayHTML(); }
+function updateLive(force){
+  const s = S.session; if (!s || route().v !== 'cook') return;
+  const k = curKey(); let total = 0; for (const v of Object.values(s.times)) total += v;
+  const a = $('#sw-total'); if (a) a.textContent = fmtClock(total);
+  const stepMs = s.times[k] || 0;
+  const b = $('#sw-step'); if (b) b.textContent = fmtClock(stepMs);
+  const c = $('#sw-step2'); if (c) c.textContent = fmtClock(stepMs);
+  if (force){
+    const sw = $('#sw'); if (sw){ sw.classList.toggle('paused', !s.running); $('#sw-icon').innerHTML = s.running ? I.pause : I.play; sw.querySelector('.sw-sub .lbl').textContent = s.running ? ' this step' : ' paused'; sw.querySelector('.sw-main').setAttribute('aria-label', s.running ? 'Pause stopwatch' : 'Resume stopwatch'); }
+  }
+  const now = Date.now();
+  s.timers.forEach(t => { if (t.state !== 'running') return; const el = document.querySelector(`[data-tid="${t.id}"] [data-left]`); if (el) el.textContent = fmtClock(t.endAt - now); });
+}
+function openDrawer(){
+  const s = S.session, r = getRecipe(s.recipe_id), ix = getIx(r), seq = seqFor(r, s);
+  const wasOpen = S.ui.sheet === 'drawer';
+  openSheet('Ingredients', `${scalerHTML(r)}<div id="drawer-ings">${ingredientsHTML(r, s.factor, ingStates(ix, seq, s.idx))}</div>`, { name: 'drawer' });
+  if (!wasOpen){ const sh = $('.sheet'), n = sh && sh.querySelector('.ing-row.now'); if (n) sh.scrollTop = Math.max(0, n.offsetTop - 140); }
+}
+function openJump(){
+  const s = S.session, r = getRecipe(s.recipe_id), seq = seqFor(r, s);
+  let html = '<ul class="jump-list">', last = Symbol(), n = 0;
+  seq.forEach((e, i) => {
+    const sec = e.kind === 'step' ? e.step.section : null;
+    if (e.kind === 'step' && sec !== last){ if (sec) html += `<li class="jump-sec">${esc(sec)}</li>`; last = sec; n = 0; }
+    n++;
+    const t = s.times[e.key];
+    html += `<li><button class="${i === s.idx ? 'cur-j' : ''}" data-act="jump-to" data-i="${i}"><span class="n">${e.kind === 'step' ? n : ''}</span><span>${esc(e.title)}</span><span class="tm">${t ? fmtClock(t) : ''}</span></button></li>`;
+  });
+  openSheet('Steps', html + '</ul>', { name: 'jump' });
+}
+function openNewTimer(){
+  const s = S.session, r = getRecipe(s.recipe_id), seq = seqFor(r, s), cur = seq[s.idx];
+  openSheet('New timer', `<label class="f" for="tn-label">Name</label><input type="text" id="tn-label" value="${esc(cur.title)}">
+    <label class="f">Quick start</label><div class="presets">${[1, 2, 3, 5, 8, 10, 12, 15, 20, 25, 30, 45, 60].map(m => `<button class="chip" data-act="timer-preset" data-m="${m}">${m} min</button>`).join('')}</div>
+    <label class="f" for="tn-min">Or set your own</label><div class="row2"><input type="number" id="tn-min" inputmode="numeric" min="0" placeholder="Minutes"><input type="number" id="tn-sec" inputmode="numeric" min="0" max="59" placeholder="Seconds"><button class="btn primary" data-act="timer-custom">Start timer</button></div>`, { name: 'timer' });
+}
+
+/* ---------- Finish and summary ---------- */
+function viewDone(){
+  const s = S.session;
+  if (!s){
+    const c = S.ui.savedCook && S.cooks.get(S.ui.savedCook);
+    return `<div class="page"><div class="topline"><a class="btn" href="#/">${I.back} Recipes</a></div>
+      <div class="empty glass"><h2>${c ? 'Cook saved on this device' : 'No cook to review'}</h2>
+      ${c ? `<p>${esc(c.recipe_title)}: ${fmtMinutes(c.active_seconds * 1000)} min active${c.per_serving_min ? `, ${fmtMinutes(c.per_serving_min * 60000)} min per serving` : ''}.</p><p>Save your records to OneDrive so they are safe if this device clears its storage.</p>
+        <div class="row"><button class="btn primary big" data-act="export-log">${I.share} Save records to Files</button><a class="btn big" href="#/">Back to recipes</a></div>` : '<div class="row"><a class="btn primary" href="#/">Back to recipes</a></div>'}</div></div>`;
+  }
+  const r = getRecipe(s.recipe_id); if (!r) return '<div class="page"><p>Recipe missing.</p></div>';
+  const seq = seqFor(r, s);
+  let total = 0; seq.forEach(e => total += s.times[e.key] || 0);
+  const elapsed = (s.finishedMs || Date.now()) - s.startedMs;
+  const servings = s.servings ?? s.summaryServings ?? null;
+  const per = servings ? total / servings : null;
+  return `<div class="page">
+    <div class="topline"><button class="btn" data-act="resume-cooking">${I.back} Back to cooking</button></div>
+    <div class="r-hero"><h1>Cook finished</h1><div class="sub">${esc(r.title)}, started ${dmy(s.started_at)} at ${s.started_at.slice(11, 16)}</div></div>
+    <div class="big-facts">
+      <div class="fact glass"><b>${fmtMinutes(total)} min</b>hands-on (stopwatch)</div>
+      <div class="fact glass"><b>${fmtMinutes(elapsed)} min</b>start to finish</div>
+      <div class="fact glass"><b>${per ? fmtMinutes(per) + ' min' : 'Not set'}</b>per serving${r.time.per_serving_min != null ? `, your note says ${r.time.per_serving_min}` : ''}</div>
+    </div>
+    <section class="card glass"><div class="scaler" style="border:0;margin:0;padding:0"><span class="lbl">Servings made</span>
+      <span class="stepper"><button data-act="sum-serv" data-d="-1" aria-label="Fewer">−</button><output>${servings ?? '–'}</output><button data-act="sum-serv" data-d="1" aria-label="More">+</button></span></div></section>
+    <section class="card glass"><h2>Time per step</h2><p class="muted">Use −1 and +1 to fix a step if the stopwatch ran while you were away or was left paused.</p>
+      ${seq.map(e => `<div class="st-row"><span>${esc(e.title)}</span><button class="adj" data-act="sum-adj" data-key="${esc(e.key)}" data-d="-1" aria-label="Take 1 minute off ${esc(e.title)}">−1</button><button class="adj" data-act="sum-adj" data-key="${esc(e.key)}" data-d="1" aria-label="Add 1 minute to ${esc(e.title)}">+1</button><span class="tm">${fmtClock(s.times[e.key] || 0)}</span></div>`).join('')}</section>
+    <section class="card glass"><h2>Notes for this cook</h2><textarea data-input="cook-notes" placeholder="What would you change next time?">${esc(s.notes || '')}</textarea></section>
+    <div class="actions"><button class="btn primary big" data-act="save-cook">Save cook</button><button class="btn big danger" data-act="discard-cook">Discard cook</button></div>
+  </div>`;
+}
+async function saveCook(){
+  const s = S.session, r = getRecipe(s.recipe_id), seq = seqFor(r, s);
+  let total = 0; seq.forEach(e => total += s.times[e.key] || 0);
+  const servings = s.servings ?? s.summaryServings ?? null;
+  const c = { id: `${r.id}_${stamp(new Date(s.startedMs))}_${S.device}`, recipe_id: r.id, recipe_title: r.title, recipe_version: r.version || null, recipe_converted_on: r.converted_on || null,
+    device: deviceLabel(), started_at: s.started_at, finished_at: isoLocal(new Date(s.finishedMs || Date.now())), saved_at: isoLocal(),
+    scale_factor: Math.round(s.factor * 1000) / 1000, servings, mise_en_place: !!s.includeMise,
+    steps: seq.map(e => ({ step_id: e.key, title: e.title, seconds: Math.round((s.times[e.key] || 0) / 1000) })),
+    active_seconds: Math.round(total / 1000), elapsed_seconds: Math.round(((s.finishedMs || Date.now()) - s.startedMs) / 1000),
+    per_serving_min: servings ? Math.round(total / servings / 600) / 100 : null, notes: (s.notes || '').trim(), app_version: APP_VERSION };
+  c.device_id = S.device;
+  S.cooks.set(c.id, c); await safe(DB.put('cooks', c));
+  S.session = null; saveSession(); ringing.clear(); renderAlarm();
+  S.ui.savedCook = c.id; render();
+}
+
+/* ---------- Import / export ---------- */
+function parseLoose(text){
+  let t = String(text).replace(/^﻿/, '').trim();
+  const fences = [...t.matchAll(/```(?:json)?\s*([\s\S]*?)```/g)].map(m => m[1].trim()).filter(Boolean);
+  if (fences.length > 1) return fences.map(x => JSON.parse(x));
+  if (fences.length === 1) t = fences[0];
+  if (!/^[\[{]/.test(t)){ const i = t.search(/[\[{]/); if (i >= 0) t = t.slice(i); }
+  return [JSON.parse(t)];
+}
+function newResults(){ return { added: [], updated: [], same: 0, older: [], cooksAdded: 0, cooksSame: 0, errors: [], warnings: [] }; }
+async function importText(text, name, R){
+  let objs; try { objs = parseLoose(text); } catch (e) { R.errors.push(`${name}: this is not valid JSON (${e.message}).`); return; }
+  for (const o of objs) await importObj(o, name, R);
+}
+async function importObj(o, name, R){
+  if (Array.isArray(o)){ for (const x of o) await importObj(x, name, R); return; }
+  if (!o || typeof o !== 'object'){ R.errors.push(`${name}: nothing to import.`); return; }
+  if (o.kind === 'cook-log' || o.kind === 'backup' || (Array.isArray(o.cooks) && !o.steps)){
+    const add = [];
+    (o.cooks || []).forEach(c => { if (!c || !c.id || !c.recipe_id) return; if (S.cooks.has(c.id)) R.cooksSame++; else { S.cooks.set(c.id, c); add.push(c); R.cooksAdded++; } });
+    if (add.length) await safe(DB.putMany('cooks', add));
+    if (Array.isArray(o.recipes)) for (const x of o.recipes) await importRecipe(x, name, R);
+    return;
+  }
+  if (Array.isArray(o.recipes)){ for (const x of o.recipes) await importRecipe(x, name, R); return; }
+  if (isRecipe(o)){ await importRecipe(o, name, R); return; }
+  R.errors.push(`${name}: not a recipe file or cook log.`);
+}
+async function importRecipe(src, name, R, force){
+  if (!isRecipe(src)){ R.errors.push(`${name}: skipped an item that is not a recipe.`); return; }
+  const r = normRecipe(src), old = S.recipes.get(r.id);
+  if (old && !force){
+    if (JSON.stringify(old.data) === JSON.stringify(r)){ R.same++; return; }
+    if (old.data.converted_on && r.converted_on && r.converted_on < old.data.converted_on){ R.older.push({ src, name, title: r.title, have: old.data.converted_on, got: r.converted_on }); return; }
+  }
+  const ix = buildIndex(r);
+  if (old){ const gone = old.data.steps.map(x => x.id).filter(id => !r.steps.some(x => x.id === id)); if (gone.length) R.warnings.push(`${r.title}: steps ${gone.join(', ')} were removed. Their timing history stays in your log.`); }
+  if (ix.warnings.length) R.warnings.push(`${r.title}: ${ix.warnings.length} highlight or link problem${ix.warnings.length === 1 ? '' : 's'} (see Conversion notes on the recipe).`);
+  const rec = { id: r.id, data: r, imported_at: isoLocal(), file: name, warnings: ix.warnings };
+  S.recipes.set(r.id, rec); S.ix.delete(r.id); await safe(DB.put('recipes', rec));
+  (old ? R.updated : R.added).push(r.title);
+}
+async function importFiles(files){
+  const R = newResults();
+  for (const f of files){ try { await importText(await f.text(), f.name, R); } catch (e) { R.errors.push(`${f.name}: ${e.message}`); } }
+  finishImport(R);
+}
+function finishImport(R){
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  S.ui.lastImport = R;
+  const li = (arr) => arr.length ? `<ul class="res-list">${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul>` : '';
+  const parts = [];
+  if (R.added.length) parts.push(`<p><b>Added ${R.added.length} recipe${R.added.length === 1 ? '' : 's'}</b></p>${li(R.added)}`);
+  if (R.updated.length) parts.push(`<p><b>Updated ${R.updated.length}</b></p>${li(R.updated)}`);
+  if (R.same) parts.push(`<p>${R.same} recipe${R.same === 1 ? ' was' : 's were'} already up to date.</p>`);
+  if (R.cooksAdded || R.cooksSame) parts.push(`<p><b>Cook records:</b> ${R.cooksAdded} added, ${R.cooksSame} already on this device.</p>`);
+  if (R.older.length) parts.push(`<p><b>Kept the newer copy of ${R.older.length} recipe${R.older.length === 1 ? '' : 's'}</b>. The file has an older conversion than this device.</p>${li(R.older.map(o => `${o.title}: device ${dmy(o.have)}, file ${dmy(o.got)}`))}<button class="btn" data-act="import-older">Replace with the older copies</button>`);
+  if (R.warnings.length) parts.push(`<p><b>Check these</b></p>${li(R.warnings)}`);
+  if (R.errors.length) parts.push(`<p><b>Could not import</b></p>${li(R.errors)}`);
+  if (!parts.length) parts.push('<p>Nothing was imported.</p>');
+  if (route().v === 'lib' || route().v === 'recipe') render();
+  closeSheet();
+  openSheet('Import finished', parts.join('') + `<div class="actions"><button class="btn primary" data-act="sheet-close">Done</button></div>`, { name: 'import' });
+}
+function cookLogObj(){ return { kind: 'cook-log', schema_version: 1, app_version: APP_VERSION, exported_at: isoLocal(), exported_by: deviceLabel(), cooks: [...S.cooks.values()].sort((a, b) => String(a.started_at).localeCompare(String(b.started_at))) }; }
+function exportFile(obj, name, onDone){
+  const file = new File([JSON.stringify(obj, null, 2)], name, { type: 'application/json' });
+  const download = () => {
+    const url = URL.createObjectURL(file), a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 5000); if (onDone) onDone(); toast(`Downloaded ${name}`);
+  };
+  if (isTouch() && navigator.canShare && navigator.canShare({ files: [file] })){
+    navigator.share({ files: [file], title: name }).then(() => { if (onDone) onDone(); toast('Record saved'); })
+      .catch(e => { if (e && e.name === 'AbortError') toast('Not saved. Tap Save records to try again.'); else download(); });
+  } else download();
+}
+function exportLog(){
+  if (!S.cooks.size){ toast('No cook records yet.'); return; }
+  exportFile(cookLogObj(), `cook-log-${isoDate()}.json`, () => { S.lastExport = isoLocal(); safe(DB.put('kv', S.lastExport, 'lastExport')); if (route().v === 'lib') render(); });
+}
+function exportBackup(){
+  exportFile({ kind: 'backup', schema_version: 1, app_version: APP_VERSION, exported_at: isoLocal(), exported_by: deviceLabel(), recipes: [...S.recipes.values()].map(x => x.data), cooks: [...S.cooks.values()], settings: S.settings }, `cook-mode-backup-${isoDate()}.json`);
+}
+
+/* ---------- Settings ---------- */
+function applySettings(){
+  const h = document.documentElement;
+  if (S.settings.theme === 'auto') h.removeAttribute('data-theme'); else h.setAttribute('data-theme', S.settings.theme);
+  h.style.setProperty('--step-scale', S.settings.textSize);
+}
+function saveSettings(){ applySettings(); safe(DB.put('kv', S.settings, 'settings')); }
+async function openSettings(){
+  const st = S.settings;
+  let persisted = 'unknown'; try { if (navigator.storage && navigator.storage.persisted) persisted = (await navigator.storage.persisted()) ? 'protected' : 'not protected'; } catch (e) {}
+  const seg = (key, opts) => `<span class="seg" role="group">${opts.map(([v, l]) => `<button data-act="set" data-k="${key}" data-v="${v}" aria-pressed="${String(st[key]) === String(v)}">${l}</button>`).join('')}</span>`;
+  const sw = (key, label, d) => `<div class="set-row"><span><b>${label}</b>${d ? `<br><span class="d">${d}</span>` : ''}</span><label class="switch"><input type="checkbox" data-input="set-bool" data-k="${key}" ${st[key] ? 'checked' : ''}><span class="sr">${label}</span></label></div>`;
+  openSheet('Settings', `
+    <div class="set-row"><b>Appearance</b>${seg('theme', [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']])}</div>
+    <div class="set-row"><b>Step text size</b>${seg('textSize', [['1', 'Normal'], ['1.15', 'Large'], ['1.3', 'Extra large']])}</div>
+    ${sw('tapZones', 'Tap sides to change step', 'Left side goes back, right side goes forward. Swiping always works.')}
+    ${sw('sound', 'Timer sound')}
+    ${sw('wake', 'Keep screen on while cooking')}
+    <div class="set-row"><span><b>Device name</b><br><span class="d">Shown in cook records, so you can tell iPad and phone cooks apart.</span></span><input type="text" style="max-width:220px" data-input="set-name" value="${esc(st.deviceName)}" placeholder="${esc(S.device)}"></div>
+    <h3 style="margin-top:20px">Your data</h3>
+    <div class="actions"><button class="btn" data-act="import">${I.import} Import files</button><button class="btn" data-act="paste">${I.paste} Paste JSON</button><button class="btn" data-act="export-log">${I.share} Save records</button><button class="btn" data-act="backup">Export everything</button></div>
+    <p class="muted" style="margin-top:14px">${S.recipes.size} recipes and ${S.cooks.size} cook records on this device. Storage is ${persisted}. Device code ${esc(S.device)}. App version ${APP_VERSION}.</p>
+    <div class="actions"><button class="btn danger" data-act="wipe">Delete all data on this device</button></div>`, { name: 'settings' });
+}
+function openPaste(){
+  openSheet('Paste JSON', `<p>Paste one recipe, a batch, or a cook log. Code fences from the AI chat are fine.</p><textarea id="paste-box" style="min-height:220px;font-size:15px" autofocus placeholder='{ "schema_version": 2, "id": "...", ...}'></textarea>
+    <div class="actions"><button class="btn primary" data-act="paste-go">Import</button></div>`, { name: 'paste' });
+}
+
+/* ---------- Actions ---------- */
+const ACT = {
+  'sheet-close': () => closeSheet(),
+  import: () => $('#file-in').click(),
+  paste: () => openPaste(),
+  'paste-go': async () => { const t = $('#paste-box').value; if (!t.trim()) return; const R = newResults(); await importText(t, 'pasted text', R); finishImport(R); },
+  'import-older': async () => { const R0 = S.ui.lastImport; if (!R0) return; const R = newResults(); for (const o of R0.older) await importRecipe(o.src, o.name, R, true); finishImport(R); },
+  'export-log': () => exportLog(),
+  backup: () => exportBackup(),
+  settings: () => openSettings(),
+  set: el => { const k = el.dataset.k; S.settings[k] = k === 'textSize' ? +el.dataset.v : el.dataset.v; saveSettings(); el.parentElement.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b === el)); },
+  wipe: async () => { if (!(await ask('Delete all recipes, cook records and settings on this device? Files in OneDrive are not touched.', 'Delete everything', true))) return;
+    await Promise.all(['recipes', 'cooks', 'kv'].map(s => DB.clear(s))); S.recipes.clear(); S.cooks.clear(); S.session = null; S.lastExport = null; S.settings = { ...DEFAULT_SETTINGS }; await DB.put('kv', S.device, 'device'); applySettings(); go('#/'); toast('All data deleted on this device'); },
+  cat: el => { S.ui.cat = el.dataset.v; document.querySelectorAll('.cats .chip').forEach(b => b.setAttribute('aria-pressed', b === el)); renderLibList(); },
+  resume: () => go(S.session && S.session.finished ? '#/done' : '#/cook'),
+  start: async el => {
+    const r = getRecipe(el.dataset.id); if (!r) return;
+    if (S.session && S.session.recipe_id !== r.id){ const o = getRecipe(S.session.recipe_id); if (!(await ask(`You have an unfinished cook of ${o ? o.title : 'another recipe'}. Discard it and start ${r.title}?`, 'Discard and start', true))) return; S.session = null; ringing.clear(); }
+    if (r.advance_prep.length){
+      openSheet('Before you start', `<p>This recipe needs some things done ahead:</p><ul style="font-size:18px">${r.advance_prep.map(a => `<li>${esc(a.task || a)}${a.lead_time ? ` <span class="muted">(${esc(a.lead_time)})</span>` : ''}</li>`).join('')}</ul><div class="actions"><button class="btn primary big" id="ap-go">${I.play} Start cooking</button><button class="btn big" data-act="sheet-close">Not yet</button></div>`, { name: 'ahead' });
+      $('#ap-go').onclick = () => { closeSheet(); startCook(r); }; return;
+    }
+    startCook(r);
+  },
+  'del-recipe': async el => { const r = getRecipe(el.dataset.id); if (!r || !(await ask(`Delete ${r.title} from this device? Its cook records are kept.`, 'Delete recipe', true))) return; S.recipes.delete(r.id); await safe(DB.del('recipes', r.id)); go('#/'); toast(`Deleted ${r.title}`); },
+  'del-cook': async el => { if (!(await ask('Delete this cook record from this device? Copies already saved to OneDrive are not changed.', 'Delete record', true))) return; S.cooks.delete(el.dataset.id); await safe(DB.del('cooks', el.dataset.id)); render(); },
+  serv: el => { const r = currentRecipe(); if (!r) return; const sc = getScale(r); const n = clamp((sc.servings || r.servings.count) + +el.dataset.d, 1, Math.max(24, r.servings.count * 4)); setScale(r, { servings: n, factor: n / r.servings.count }); afterScale(r); },
+  mult: el => { const r = currentRecipe(); if (!r) return; setScale(r, { servings: null, factor: +el.dataset.v }); afterScale(r); },
+  next: () => goStep(1), prev: () => goStep(-1), finish: () => finishCook(),
+  jump: () => openJump(), 'jump-to': el => jumpTo(+el.dataset.i),
+  drawer: () => openDrawer(),
+  'sw-toggle': () => swToggle(), 'sw-adj': el => swAdjust(+el.dataset.d),
+  'timer-step': el => {
+    const s = S.session, r = getRecipe(s.recipe_id), cur = seqFor(r, s)[s.idx]; if (cur.kind !== 'step') return;
+    const i = +el.dataset.i, t = cur.step.timers[i]; if (!t) return;
+    if (s.timers.some(x => x.src === `${cur.step.id}:${i}` && x.state !== 'done')){ toast(`${t.label || 'Timer'} is already running`); return; }
+    addTimer(t.label || cur.title, t.seconds * 1000, t.max_seconds ? t.max_seconds * 1000 : null, `${cur.step.id}:${i}`);
+    toast(`${t.label || cur.title}: ${fmtDur(t.seconds)} timer started${t.max_seconds ? ` (check up to ${fmtDur(t.max_seconds)})` : ''}`);
+  },
+  'timer-new': () => openNewTimer(),
+  'timer-preset': el => { const l = $('#tn-label').value.trim() || 'Timer'; closeSheet(); addTimer(l, +el.dataset.m * 60000); },
+  'timer-custom': () => { const m = +($('#tn-min').value || 0), sec = +($('#tn-sec').value || 0), ms = (m * 60 + sec) * 1000; if (ms <= 0){ toast('Enter minutes or seconds first'); return; } const l = $('#tn-label').value.trim() || 'Timer'; closeSheet(); addTimer(l, ms); },
+  't-toggle': el => timerAction(el.dataset.id, 'toggle'), 't-plus': el => timerAction(el.dataset.id, 'plus'), 't-remove': el => timerAction(el.dataset.id, 'remove'),
+  'alarm-stop': () => stopAlarm(),
+  'resume-cooking': () => { const s = S.session; if (!s) return go('#/'); s.finished = false; s.running = true; s.lastTick = Date.now(); saveSession(); go('#/cook'); },
+  'sum-adj': el => { const s = S.session; const k = el.dataset.key; s.times[k] = Math.max(0, (s.times[k] || 0) + +el.dataset.d * 60000); saveSession(); keepScroll(render); },
+  'sum-serv': el => { const s = S.session; const r = getRecipe(s.recipe_id); const curN = s.servings ?? s.summaryServings ?? (r.servings.count ? Math.round(r.servings.count * s.factor) : 0); const n = Math.max(1, curN + +el.dataset.d); if (s.servings != null) s.servings = n; else s.summaryServings = n; saveSession(); keepScroll(render); },
+  'save-cook': () => saveCook(),
+  'discard-cook': async () => { if (!(await ask('Discard this cook? Its times will not be recorded.', 'Discard cook', true))) return; S.session = null; saveSession(); ringing.clear(); renderAlarm(); go('#/'); },
+};
+function keepScroll(fn){ const y = window.scrollY; fn(); window.scrollTo(0, y); }
+function currentRecipe(){ const rt = route(); if (rt.v === 'cook' && S.session) return getRecipe(S.session.recipe_id); if (rt.v === 'recipe') return getRecipe(rt.id); return null; }
+function afterScale(r){
+  const rt = route();
+  if (rt.v === 'cook'){ renderCook(false); }
+  else { keepScroll(render); }
+}
+const INPUT = {
+  q: el => { S.ui.q = el.value; renderLibList(); },
+  mise: el => { const id = route().id; S.ui.mise[id] = el.checked; },
+  'mise-task': el => { const s = S.session; const i = +el.dataset.i; const set = new Set(s.miseDone); el.checked ? set.add(i) : set.delete(i); s.miseDone = [...set]; saveSession(); },
+  'cook-notes': el => { if (S.session){ S.session.notes = el.value; clearTimeout(INPUT._t); INPUT._t = setTimeout(saveSession, 500); } },
+  'set-bool': el => { S.settings[el.dataset.k] = el.checked; saveSettings(); syncWake(); if (route().v === 'cook') renderCook(false); },
+  'set-name': el => { S.settings.deviceName = el.value; clearTimeout(INPUT._n); INPUT._n = setTimeout(saveSettings, 400); },
+};
+
+/* ---------- Global events ---------- */
+let swipe = null, swallowClick = 0, lastNav = 0;
+document.addEventListener('click', e => {
+  if (e.target.classList && e.target.classList.contains('sheet-wrap')){ closeSheet(); return; }
+  const el = e.target.closest('[data-act]');
+  if (el){ const fn = ACT[el.dataset.act]; if (fn){ if (el.tagName !== 'A') e.preventDefault(); fn(el, e); } return; }
+  const stage = e.target.closest('#stage');
+  if (stage && S.settings.tapZones && route().v === 'cook' && !e.target.closest('a,button,input,label,textarea')){
+    if (Date.now() < swallowClick) return;
+    if (window.getSelection && String(window.getSelection()).length) return;
+    if (Date.now() - lastNav < 350) return; lastNav = Date.now();
+    const b = stage.getBoundingClientRect(); const x = (e.clientX - b.left) / b.width;
+    goStep(x < 0.33 ? -1 : 1);
+  }
+});
+document.addEventListener('input', e => { const el = e.target.closest('[data-input]'); if (el && INPUT[el.dataset.input]) INPUT[el.dataset.input](el, e); });
+document.addEventListener('touchstart', e => { if (e.touches.length === 1 && e.target.closest('#stage')) swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: Date.now() }; else swipe = null; }, { passive: true });
+document.addEventListener('touchend', e => {
+  if (!swipe) return; const t = e.changedTouches[0], dx = t.clientX - swipe.x, dy = t.clientY - swipe.y; const quick = Date.now() - swipe.t < 700; swipe = null;
+  if (quick && Math.abs(dx) > 70 && Math.abs(dy) < Math.abs(dx) * 0.6){ swallowClick = Date.now() + 500; lastNav = Date.now(); goStep(dx < 0 ? 1 : -1); }
+}, { passive: true });
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input,textarea,select')) return;
+  if (e.key === ' ' && e.target.closest('button,a')) return;
+  if (e.key === 'Escape' && S.ui.sheet){ closeSheet(); return; }
+  if (route().v !== 'cook' || S.ui.sheet) return;
+  if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown'){ e.preventDefault(); goStep(1); }
+  else if (e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); goStep(-1); }
+  else if (e.key.toLowerCase() === 'p') swToggle();
+});
+$('#file-in').addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) importFiles(files); });
+let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (route().v === 'cook' && S.session) renderCook(false); }, 200); });
+window.addEventListener('pagehide', () => { if (S.session){ flush(); saveSession(); } });
+
+/* ---------- Boot ---------- */
+(async function boot(){
+  await DB.open();
+  try {
+    const [recs, cooks, settings, session, lastExport, device] = await Promise.all([DB.all('recipes'), DB.all('cooks'), DB.get('kv', 'settings'), DB.get('kv', 'session'), DB.get('kv', 'lastExport'), DB.get('kv', 'device')]);
+    recs.forEach(x => { x.data = normRecipe(x.data); S.recipes.set(x.id, x); });
+    cooks.forEach(c => S.cooks.set(c.id, c));
+    S.settings = { ...DEFAULT_SETTINGS, ...(settings || {}) };
+    S.lastExport = lastExport || null;
+    S.device = device || rid(4); if (!device) DB.put('kv', S.device, 'device');
+    if (session && getRecipe(session.recipe_id)){
+      S.session = session;
+      const gap = Date.now() - session.lastTick;
+      if (session.running && !session.finished && gap > 2 * 60000){
+        flush(); const k = curKey();
+        toast(`The stopwatch kept running while the app was closed (${fmtDur(gap / 1000)} added).`, { label: 'Remove it', fn: () => { S.session.times[k] = Math.max(0, (S.session.times[k] || 0) - gap); saveSession(); updateLive(); } });
+      } else session.lastTick = Date.now();
+    }
+  } catch (e) { console.error(e); toast('Could not read saved data on this device.'); }
+  if (DB.mem) toast('This browser is blocking storage. Recipes will be lost when you close the app.');
+  applySettings(); render();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) navigator.serviceWorker.register('sw.js').catch(() => {});
+})();
+</script>
+</body>
+</html>
