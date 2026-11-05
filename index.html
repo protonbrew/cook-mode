@@ -32,6 +32,7 @@
   --serif:"Fraunces", ui-serif, "New York", Georgia, serif;
   --sans:"Atkinson Hyperlegible Next", "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --step-scale:1;
+  --fs-step:clamp(23px, 1.15rem + 1.5vw, 32px); --fs-title:clamp(24px, 1rem + 1.4vw, 34px); --fs-sub:clamp(20px, 1rem + 1.1vw, 27px);
   --safe-t:env(safe-area-inset-top, 0px); --safe-b:env(safe-area-inset-bottom, 0px);
   color-scheme:light;
 }
@@ -211,10 +212,10 @@ details.conv summary{cursor:pointer;font-weight:700;min-height:40px;display:flex
 .cur{border-radius:28px;padding:22px 26px 24px;margin-bottom:22px}
 .cur.node::before{left:-34px;top:30px;width:22px;height:22px;background:var(--saffron);border:4px solid var(--basil)}
 .cur-pos{color:var(--ink-2);font-size:16px;margin-bottom:4px}
-.cur-title{font-size:calc(clamp(24px, 1rem + 1.4vw, 34px) * var(--step-scale));margin-bottom:12px;color:var(--rosemary)}
+.cur-title{font-size:calc(var(--fs-title) * var(--step-scale));margin-bottom:12px;color:var(--rosemary)}
 .cur-title.gen{font-weight:500}
-.step-text{font-size:calc(clamp(23px, 1.15rem + 1.5vw, 32px) * var(--step-scale));line-height:1.42;margin:0}
-.step-text + .subs, .cur .subs{font-size:calc(clamp(20px, 1rem + 1.1vw, 27px) * var(--step-scale));line-height:1.4;margin-top:12px}
+.step-text{font-size:calc(var(--fs-step) * var(--step-scale));line-height:1.42;margin:0}
+.step-text + .subs, .cur .subs{font-size:calc(var(--fs-sub) * var(--step-scale));line-height:1.4;margin-top:12px}
 .cur .subs li{margin-bottom:8px}
 mark.ing{background:var(--saffron-wash);color:inherit;font-weight:700;border-radius:6px;padding:0 .14em;-webkit-box-decoration-break:clone;box-decoration-break:clone}
 mark.ing .sc{color:var(--saffron-ink)}
@@ -228,7 +229,7 @@ mark.ing .sc{color:var(--saffron-ink)}
 .schip{display:inline-flex;align-items:baseline;gap:6px;padding:7px 13px;border-radius:12px;background:var(--saffron-wash);font-size:17px}
 .schip b{color:var(--saffron-ink)}
 .mise-list{list-style:none;padding:0;margin:8px 0 0}
-.mise-list label{display:flex;gap:14px;align-items:flex-start;padding:10px 0;font-size:calc(clamp(20px, 1rem + 1.1vw, 27px) * var(--step-scale));line-height:1.35;cursor:pointer}
+.mise-list label{display:flex;gap:14px;align-items:flex-start;padding:10px 0;font-size:calc(var(--fs-sub) * var(--step-scale));line-height:1.35;cursor:pointer}
 .mise-list input{width:28px;height:28px;margin-top:3px;accent-color:var(--basil);flex:none}
 .mise-list input:checked + span{color:var(--done);text-decoration:line-through}
 .up{margin-bottom:16px;font-size:18px}
@@ -236,7 +237,10 @@ mark.ing .sc{color:var(--saffron-ink)}
 .up .ux{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:var(--ink-2)}
 .up .ua{color:var(--muted);font-size:14.5px}
 .up.u1{opacity:.72}.up.u2{opacity:.6}.up.u3{opacity:.5}.up.u4{opacity:.42}
-.cook-foot{display:flex;align-items:center;gap:12px;padding:12px 14px calc(var(--safe-b) + 12px);border-width:1px 0 0 0;border-radius:0;flex-wrap:wrap}
+.cook-foot{display:flex;align-items:center;gap:12px;padding:12px 14px calc(var(--safe-b) + 12px);border-width:1px 0 0 0;border-radius:0;flex-wrap:nowrap}
+.cook-foot .tray{order:0}.cook-foot .fb-back{order:1}.cook-foot .drawer-btn{order:1}.cook-foot .next{order:2;min-height:60px;font-size:19px;min-width:190px}
+.cook-foot .fb-back{min-height:60px}
+.lbl-s{display:none}
 .tray{display:flex;gap:8px;overflow-x:auto;flex:1 1 200px;min-width:0;scrollbar-width:none;align-items:center}
 .tray::-webkit-scrollbar{display:none}
 .pill{display:inline-flex;align-items:center;gap:8px;flex:none;min-height:52px;padding:0 6px 0 16px;border-radius:999px;border:1px solid var(--line);background:var(--glass-strong)}
@@ -262,28 +266,67 @@ mark.ing .sc{color:var(--saffron-ink)}
 }
 @media (min-width:1200px){.cook-body{grid-template-columns:380px minmax(0,1fr)}}
 @media (max-width:819px){
-  .strip{display:flex}
-  .schip{font-size:15.5px;padding:5px 11px}
+  :root{--fs-step:19px;--fs-title:21px;--fs-sub:17.5px}
+  /* the whole page scrolls on phones, so the browser can hide its own bars */
+  .cook{position:relative;inset:auto;display:flex;flex-direction:column;min-height:100vh;min-height:100dvh}
+  .cook-bar,.cook-foot{background:var(--glass-strong)}
+  .cook-bar{position:sticky;top:0;z-index:5;gap:6px;padding:calc(var(--safe-t) + 6px) 8px 6px}
+  .progress{position:sticky;top:var(--bar-h,56px);z-index:5;height:4px}
+  .cook-body{flex:1;display:block;padding:10px 10px 0}
+  .stage{overflow:visible;padding:0 0 12px}
+  .cook-foot{position:sticky;bottom:0;z-index:5;gap:6px;padding:6px 8px calc(var(--safe-b) + 6px)}
+  .cb-back{min-height:40px;padding:0 8px}
+  .cb-back .lbl{display:none}
+  .cb-title .rt{font-size:16px}
+  .cb-pos{font-size:14px;min-height:22px}
   .cb-pos .long{display:none}
   .cb-pos .short{display:inline}
-  .stage{padding-top:2px}
+  .sw{gap:4px}
+  .sw-adj{width:38px;height:40px;border-radius:12px;font-size:14.5px}
+  .sw-main{min-height:40px;padding:2px 10px 2px 8px;column-gap:6px;border-radius:12px}
+  .sw-main svg{width:18px;height:18px}
+  .sw-total{font-size:17px}
+  .sw-sub{font-size:11.5px}
+  .sw-sub .lbl{display:none}
+  .strip{display:flex;gap:6px;margin-bottom:10px}
+  .schip{font-size:14px;padding:4px 9px;border-radius:10px}
+  .cur{padding:14px 15px 16px;border-radius:20px;margin-bottom:14px}
+  .cur-pos{font-size:13.5px;margin-bottom:2px}
+  .cur-title{margin-bottom:8px}
+  .step-text{line-height:1.4}
+  .cur .subs{margin-top:8px;padding-left:1.1em}
+  .cur .subs li{margin-bottom:4px}
+  .mise-list label{padding:6px 0;gap:10px}
+  .mise-list input{width:22px;height:22px}
+  .tchips{margin-top:12px;gap:8px}
+  .tchip{min-height:42px;font-size:15.5px;padding:0 14px 0 12px}
+  .tchip svg{width:18px;height:18px}
+  .stepstats{margin-top:10px;font-size:13.5px}
+  .prev{font-size:14.5px;margin-bottom:10px}
+  .up{font-size:15px;margin-bottom:10px}
   .up.u2,.up.u3,.up.u4{display:none}
-  .cb-title .rt{font-size:18px}
-  .cook-bar{gap:8px;padding-left:10px;padding-right:10px}
-  .sw-adj{width:44px;height:48px;border-radius:14px;font-size:16px}
-  .sw-main{min-height:48px;padding:3px 12px 3px 9px;column-gap:7px}
-  .sw-total{font-size:19px}
-  .cur{padding:18px 18px 20px;border-radius:24px}
-  .stem{padding-left:24px}
-  .stem::before{left:7px}
-  .node::before{left:-23px;width:12px;height:12px}
-  .cur.node::before{left:-26px;width:18px;height:18px;border-width:3px}
-  .nav .next{min-width:0;flex:1}
-  .drawer-btn{min-height:52px;padding:0 16px}
-  .nav{flex:1 1 100%}
-  .cook-foot{gap:10px}
+  .hint{font-size:12.5px;margin-bottom:6px}
+  .stem{padding-left:20px}
+  .stem::before{left:5px}
+  .node::before{left:-20px;width:10px;height:10px;top:8px}
+  .cur.node::before{left:-22px;width:14px;height:14px;border-width:3px;top:20px}
+  .cook-foot .tray{order:2;flex:1 1 auto;gap:6px}
+  .cook-foot .fb-back{order:0;min-height:44px;width:44px;padding:0}
+  .cook-foot .drawer-btn{order:1;min-height:44px;width:44px;padding:0}
+  .cook-foot .drawer-btn .lbl{display:none}
+  .cook-foot .next{order:3;min-height:44px;min-width:0;font-size:16px;padding:0 14px 0 16px;gap:4px}
+  .cook-foot .next .lbl-l{display:none}
+  .cook-foot .next .lbl-s{display:inline}
+  .pill{min-height:40px;padding:0 2px 0 10px;gap:2px}
+  .pill .pl{max-width:5.5em;font-size:13px}
+  .pill .pt{font-size:15px;min-width:2.9em}
+  .pill{padding:0 12px}
+  .pill .pl-btn{min-height:40px;gap:5px}
+  .pill > button:not(.pl-btn){display:none}
+  .pill.add{width:44px;padding:0;justify-content:center;min-height:44px}
+  .pill.add .lbl{display:none}
 }
-@media (max-width:420px){.cb-back .lbl{display:none}.sw-sub .lbl{display:none}}
+
 
 /* ---------- Summary ---------- */
 .big-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:18px 0}
@@ -328,6 +371,7 @@ textarea{width:100%;min-height:96px;border-radius:16px;border:1px solid var(--li
 .alarm{display:flex;align-items:center;gap:14px;padding:14px 14px 14px 20px;border-radius:22px;background:var(--chilli);color:#fff;box-shadow:0 14px 40px rgba(0,0,0,.3)}
 .alarm .grow{flex:1;font-size:20px;font-weight:700}
 .alarm button{border:0;background:#fff;color:var(--chilli);border-radius:999px;min-height:52px;padding:0 22px;font-weight:700;font-size:18px}
+.ver{font-size:14px;margin:36px 4px 0}
 .hint{display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin:0 0 8px;opacity:.9}
 </style>
 </head>
@@ -343,7 +387,7 @@ textarea{width:100%;min-height:96px;border-radius:16px;border:1px solid var(--li
 /* =========================================================
    Cook mode viewer. Single-file app; data lives in IndexedDB.
    ========================================================= */
-const APP_VERSION = '1.0.0';
+const APP_VERSION = '1.1.0';
 const $ = (s, r = document) => r.querySelector(s);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const pad = n => String(n).padStart(2, '0');
@@ -361,6 +405,13 @@ const rid = (n = 4) => Array.from(crypto.getRandomValues(new Uint8Array(n)), b =
 const slug = s => String(s || '').toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'recipe';
 const isTouch = () => matchMedia('(pointer:coarse)').matches;
 const isWide = () => matchMedia('(min-width:820px)').matches;
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
+const isAndroid = () => /Android/i.test(navigator.userAgent);
+const fsAvailable = () => !!(document.documentElement.requestFullscreen && document.fullscreenEnabled) && !isStandalone();
+function enterFullscreen(){ if (!fsAvailable() || document.fullscreenElement) return; document.documentElement.requestFullscreen({ navigationUI: 'hide' }).catch(() => {}); }
+function exitFullscreen(){ if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {}); }
+function autoFullscreen(){ if (S.settings.fullscreen && isAndroid() && !isWide()) enterFullscreen(); }
+
 
 /* ---------- Icons ---------- */
 const I = {
@@ -377,6 +428,8 @@ const I = {
   list:'<svg class="i" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
   search:'<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></svg>',
   basket:'<svg class="i" viewBox="0 0 24 24"><path d="M4 10h16l-1.6 8.2a2 2 0 0 1-2 1.6H7.6a2 2 0 0 1-2-1.6zM8 10l3-6M16 10l-3-6"/></svg>',
+  expand:'<svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>',
+  shrink:'<svg class="i" viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"/></svg>',
   paste:'<svg class="i" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4.5V3h6v1.5M9 10h6M9 14h6"/></svg>',
 };
 
@@ -411,7 +464,7 @@ const DB = {
 const safe = p => p.catch(e => { console.warn(e); toast('Could not save to this device. Storage may be full or blocked.'); });
 
 /* ---------- State ---------- */
-const DEFAULT_SETTINGS = { theme: 'auto', textSize: 1, tapZones: true, sound: true, wake: true, deviceName: '' };
+const DEFAULT_SETTINGS = { theme: 'auto', textSize: 1, tapZones: true, sound: true, wake: true, fullscreen: true, deviceName: '' };
 const S = { recipes: new Map(), cooks: new Map(), settings: { ...DEFAULT_SETTINGS }, session: null, lastExport: null, device: '', ix: new Map(), ui: { scales: {}, mise: {}, q: '', cat: '', savedCook: null, lastRouteKey: '' } };
 const deviceLabel = () => S.settings.deviceName.trim() || S.device;
 
@@ -650,7 +703,7 @@ function startCook(r){
   const includeMise = !!(r.mise_en_place && r.mise_en_place.recommended) && (S.ui.mise[r.id] ?? true);
   S.session = { recipe_id: r.id, started_at: isoLocal(), startedMs: Date.now(), factor: sc.factor, servings: sc.servings, includeMise,
     idx: 0, times: {}, running: true, lastTick: Date.now(), timers: [], finished: false, finishedMs: null, miseDone: [], notes: '' };
-  saveSession(); unlockAudio(); go('#/cook');
+  saveSession(); unlockAudio(); autoFullscreen(); go('#/cook');
 }
 function goStep(d){
   const s = S.session, r = s && getRecipe(s.recipe_id); if (!r) return;
@@ -761,6 +814,7 @@ function render(){
   else if (rt.v === 'recipe') app.innerHTML = viewRecipe(rt.id);
   else { app.innerHTML = viewLibrary(); renderLibList(); }
   if (S.ui.lastRouteKey !== key){ window.scrollTo(0, 0); S.ui.lastRouteKey = key; }
+  if (rt.v !== 'cook') exitFullscreen();
   syncWake(); renderAlarm();
 }
 
@@ -785,7 +839,7 @@ function viewLibrary(){
     ${resume}
     <label class="search glass">${I.search}<span class="sr">Search recipes</span><input type="search" placeholder="Search by name or ingredient" value="${esc(S.ui.q)}" data-input="q" autocomplete="off"></label>
     ${cats.length > 1 ? `<div class="cats" role="group" aria-label="Category"><button class="chip" data-act="cat" data-v="" aria-pressed="${!S.ui.cat}">All</button>${cats.map(c => `<button class="chip" data-act="cat" data-v="${esc(c)}" aria-pressed="${S.ui.cat === c}">${esc(c)}</button>`).join('')}</div>` : ''}
-    <div id="lib-list"></div></div>`;
+    <div id="lib-list"></div><p class="ver muted">Cook mode version ${APP_VERSION}</p></div>`;
 }
 function renderLibList(){
   const el = $('#lib-list'); if (!el) return;
@@ -884,7 +938,7 @@ function renderCook(full){
   let pos;
   if (cur.kind === 'step'){ const p = sectionPos(r, cur.si); pos = p.sec ? `${p.sec}, step ${p.n} of ${p.of}` : `Step ${p.n} of ${p.of}`; }
   else pos = cur.kind === 'mise' ? 'Before you cook' : 'Last step';
-  const posShort = `${s.idx + 1} of ${seq.length}`;
+  const posShort = cur.kind === 'step' ? `Step ${cur.si + 1} of ${r.steps.length}` : cur.kind === 'mise' ? 'Prep' : 'Clean up';
   const prev = s.idx > 0 ? seq[s.idx - 1] : null;
   const ups = seq.slice(s.idx + 1, s.idx + 6);
   const last = s.idx === seq.length - 1;
@@ -910,17 +964,17 @@ function renderCook(full){
       </div></main>
     </div>
     <footer class="cook-foot glass">
-      <button class="btn drawer-btn" data-act="drawer">${I.basket} Ingredients</button>
+      <button class="btn fb-back" data-act="prev" ${s.idx === 0 ? 'disabled' : ''} aria-label="Previous step">${I.back}</button>
+      <button class="btn drawer-btn" data-act="drawer" aria-label="Ingredients">${I.basket}<span class="lbl">Ingredients</span></button>
       <div class="tray" id="tray"></div>
-      <div class="nav">
-        <button class="btn" data-act="prev" ${s.idx === 0 ? 'disabled' : ''} aria-label="Previous step">${I.back}</button>
-        <button class="btn primary next" data-act="${last ? 'finish' : 'next'}">${esc(nextLabel)} ${last ? '' : I.next}</button>
-      </div>
+      <button class="btn primary next" data-act="${last ? 'finish' : 'next'}"><span class="lbl-l">${esc(nextLabel)}</span><span class="lbl-s">${last ? 'Finish' : 'Next'}</span> ${last ? '' : I.next}</button>
     </footer></div>`;
   $('#app').innerHTML = html;
   renderTray(); updateLive(true);
   if (full){
     const st = $('#stage'); if (st) st.scrollTop = 0;
+    if (!isWide()) window.scrollTo(0, 0);
+    const bar = $('.cook-bar'); if (bar) document.documentElement.style.setProperty('--bar-h', bar.offsetHeight + 'px');
     const side = $('#side'), n = side && side.querySelector('.ing-row.now');
     if (n){ const top = n.offsetTop - side.offsetTop - 60; side.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); }
   }
@@ -933,7 +987,7 @@ function curHTML(r, ix, cur, f, pos){
   if (cur.kind === 'mise'){
     const m = r.mise_en_place || {}; const done = new Set(S.session.miseDone);
     return `<section class="cur glass node"><div class="cur-pos">${esc(pos)}</div><h2 class="cur-title">Mise en place</h2>
-      <p class="step-text" style="font-size:calc(20px * var(--step-scale))">${esc(m.reason || 'Prep everything before you start cooking.')}</p>
+      <p class="step-text" style="font-size:calc(var(--fs-sub) * var(--step-scale))">${esc(m.reason || 'Prep everything before you start cooking.')}</p>
       <ul class="mise-list">${(m.tasks || []).map((t, i) => `<li><label><input type="checkbox" data-input="mise-task" data-i="${i}" ${done.has(i) ? 'checked' : ''}><span>${esc(t)}</span></label></li>`).join('')}</ul>${stats}</section>`;
   }
   if (cur.kind === 'cleanup'){
@@ -978,7 +1032,7 @@ function trayHTML(){
     return `<div class="pill ${t.state}" data-tid="${t.id}"><button class="pl-btn" data-act="t-toggle" data-id="${t.id}" aria-label="${t.state === 'running' ? 'Pause' : t.state === 'paused' ? 'Resume' : 'Dismiss'} ${esc(t.label)}">
       <span class="pl">${esc(t.label)}</span><span class="pt" data-left>${t.state === 'done' ? 'Done' : fmtClock(left)}</span></button>
       <button data-act="t-plus" data-id="${t.id}" aria-label="Add 1 minute">+1</button><button data-act="t-remove" data-id="${t.id}" aria-label="Remove timer">${I.close}</button></div>`;
-  }).join('') + `<button class="pill add" data-act="timer-new">${I.plus} Timer</button>`;
+  }).join('') + `<button class="pill add" data-act="timer-new" aria-label="New timer">${I.plus}<span class="lbl">Timer</span></button>`;
 }
 function renderTray(){ const el = $('#tray'); if (el && S.session) el.innerHTML = trayHTML(); }
 function updateLive(force){
@@ -1011,6 +1065,11 @@ function openJump(){
     html += `<li><button class="${i === s.idx ? 'cur-j' : ''}" data-act="jump-to" data-i="${i}"><span class="n">${e.kind === 'step' ? n : ''}</span><span>${esc(e.title)}</span><span class="tm">${t ? fmtClock(t) : ''}</span></button></li>`;
   });
   openSheet('Steps', html + '</ul>', { name: 'jump' });
+}
+function openTimerSheet(id){
+  const t = S.session.timers.find(x => x.id === id); if (!t) return;
+  openSheet(t.label, `<div class="actions"><button class="btn primary big" data-act="t-sheet" data-w="toggle" data-id="${id}">${t.state === 'running' ? `${I.pause} Pause` : `${I.play} Resume`}</button>
+    <button class="btn big" data-act="t-sheet" data-w="plus" data-id="${id}">${I.plus} 1 min</button><button class="btn big danger" data-act="t-sheet" data-w="remove" data-id="${id}">${I.close} Remove</button></div>`, { name: 'tsheet' });
 }
 function openNewTimer(){
   const s = S.session, r = getRecipe(s.recipe_id), seq = seqFor(r, s), cur = seq[s.idx];
@@ -1165,10 +1224,11 @@ async function openSettings(){
   const sw = (key, label, d) => `<div class="set-row"><span><b>${label}</b>${d ? `<br><span class="d">${d}</span>` : ''}</span><label class="switch"><input type="checkbox" data-input="set-bool" data-k="${key}" ${st[key] ? 'checked' : ''}><span class="sr">${label}</span></label></div>`;
   openSheet('Settings', `
     <div class="set-row"><b>Appearance</b>${seg('theme', [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']])}</div>
-    <div class="set-row"><b>Step text size</b>${seg('textSize', [['1', 'Normal'], ['1.15', 'Large'], ['1.3', 'Extra large']])}</div>
+    <div class="set-row"><b>Step text size</b>${seg('textSize', [['0.8', 'Extra small'], ['0.9', 'Small'], ['1', 'Normal'], ['1.15', 'Large'], ['1.3', 'Extra large']])}</div>
     ${sw('tapZones', 'Tap sides to change step', 'Left side goes back, right side goes forward. Swiping always works.')}
     ${sw('sound', 'Timer sound')}
     ${sw('wake', 'Keep screen on while cooking')}
+    ${sw('fullscreen', 'Full screen when cooking on a phone', 'Hides the browser bars on Android when you start cooking. Not needed if you open the app from its home screen icon.')}
     <div class="set-row"><span><b>Device name</b><br><span class="d">Shown in cook records, so you can tell iPad and phone cooks apart.</span></span><input type="text" style="max-width:220px" data-input="set-name" value="${esc(st.deviceName)}" placeholder="${esc(S.device)}"></div>
     <h3 style="margin-top:20px">Your data</h3>
     <div class="actions"><button class="btn" data-act="import">${I.import} Import files</button><button class="btn" data-act="paste">${I.paste} Paste JSON</button><button class="btn" data-act="export-log">${I.share} Save records</button><button class="btn" data-act="backup">Export everything</button></div>
@@ -1194,7 +1254,8 @@ const ACT = {
   wipe: async () => { if (!(await ask('Delete all recipes, cook records and settings on this device? Files in OneDrive are not touched.', 'Delete everything', true))) return;
     await Promise.all(['recipes', 'cooks', 'kv'].map(s => DB.clear(s))); S.recipes.clear(); S.cooks.clear(); S.session = null; S.lastExport = null; S.settings = { ...DEFAULT_SETTINGS }; await DB.put('kv', S.device, 'device'); applySettings(); go('#/'); toast('All data deleted on this device'); },
   cat: el => { S.ui.cat = el.dataset.v; document.querySelectorAll('.cats .chip').forEach(b => b.setAttribute('aria-pressed', b === el)); renderLibList(); },
-  resume: () => go(S.session && S.session.finished ? '#/done' : '#/cook'),
+  resume: () => { if (S.session && !S.session.finished) autoFullscreen(); go(S.session && S.session.finished ? '#/done' : '#/cook'); },
+  fullscreen: () => { if (document.fullscreenElement) exitFullscreen(); else enterFullscreen(); },
   start: async el => {
     const r = getRecipe(el.dataset.id); if (!r) return;
     if (S.session && S.session.recipe_id !== r.id){ const o = getRecipe(S.session.recipe_id); if (!(await ask(`You have an unfinished cook of ${o ? o.title : 'another recipe'}. Discard it and start ${r.title}?`, 'Discard and start', true))) return; S.session = null; ringing.clear(); }
@@ -1208,7 +1269,7 @@ const ACT = {
   'del-cook': async el => { if (!(await ask('Delete this cook record from this device? Copies already saved to OneDrive are not changed.', 'Delete record', true))) return; S.cooks.delete(el.dataset.id); await safe(DB.del('cooks', el.dataset.id)); render(); },
   serv: el => { const r = currentRecipe(); if (!r) return; const sc = getScale(r); const n = clamp((sc.servings || r.servings.count) + +el.dataset.d, 1, Math.max(24, r.servings.count * 4)); setScale(r, { servings: n, factor: n / r.servings.count }); afterScale(r); },
   mult: el => { const r = currentRecipe(); if (!r) return; setScale(r, { servings: null, factor: +el.dataset.v }); afterScale(r); },
-  next: () => goStep(1), prev: () => goStep(-1), finish: () => finishCook(),
+  next: () => { autoFullscreen(); goStep(1); }, prev: () => { autoFullscreen(); goStep(-1); }, finish: () => finishCook(),
   jump: () => openJump(), 'jump-to': el => jumpTo(+el.dataset.i),
   drawer: () => openDrawer(),
   'sw-toggle': () => swToggle(), 'sw-adj': el => swAdjust(+el.dataset.d),
@@ -1222,7 +1283,8 @@ const ACT = {
   'timer-new': () => openNewTimer(),
   'timer-preset': el => { const l = $('#tn-label').value.trim() || 'Timer'; closeSheet(); addTimer(l, +el.dataset.m * 60000); },
   'timer-custom': () => { const m = +($('#tn-min').value || 0), sec = +($('#tn-sec').value || 0), ms = (m * 60 + sec) * 1000; if (ms <= 0){ toast('Enter minutes or seconds first'); return; } const l = $('#tn-label').value.trim() || 'Timer'; closeSheet(); addTimer(l, ms); },
-  't-toggle': el => timerAction(el.dataset.id, 'toggle'), 't-plus': el => timerAction(el.dataset.id, 'plus'), 't-remove': el => timerAction(el.dataset.id, 'remove'),
+  't-toggle': el => { const t = S.session && S.session.timers.find(x => x.id === el.dataset.id); if (!isWide() && t && t.state !== 'done') openTimerSheet(t.id); else timerAction(el.dataset.id, 'toggle'); },
+  't-sheet': el => { closeSheet(); timerAction(el.dataset.id, el.dataset.w); }, 't-plus': el => timerAction(el.dataset.id, 'plus'), 't-remove': el => timerAction(el.dataset.id, 'remove'),
   'alarm-stop': () => stopAlarm(),
   'resume-cooking': () => { const s = S.session; if (!s) return go('#/'); s.finished = false; s.running = true; s.lastTick = Date.now(); saveSession(); go('#/cook'); },
   'sum-adj': el => { const s = S.session; const k = el.dataset.key; s.times[k] = Math.max(0, (s.times[k] || 0) + +el.dataset.d * 60000); saveSession(); keepScroll(render); },
@@ -1258,7 +1320,7 @@ document.addEventListener('click', e => {
     if (window.getSelection && String(window.getSelection()).length) return;
     if (Date.now() - lastNav < 350) return; lastNav = Date.now();
     const b = stage.getBoundingClientRect(); const x = (e.clientX - b.left) / b.width;
-    goStep(x < 0.33 ? -1 : 1);
+    autoFullscreen(); goStep(x < 0.33 ? -1 : 1);
   }
 });
 document.addEventListener('input', e => { const el = e.target.closest('[data-input]'); if (el && INPUT[el.dataset.input]) INPUT[el.dataset.input](el, e); });
@@ -1277,7 +1339,7 @@ document.addEventListener('keydown', e => {
   else if (e.key.toLowerCase() === 'p') swToggle();
 });
 $('#file-in').addEventListener('change', e => { const files = [...e.target.files]; e.target.value = ''; if (files.length) importFiles(files); });
-let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (route().v === 'cook' && S.session) renderCook(false); }, 200); });
+let rz, lastW = innerWidth; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (innerWidth === lastW) return; lastW = innerWidth; if (route().v === 'cook' && S.session) renderCook(false); }, 200); });
 window.addEventListener('pagehide', () => { if (S.session){ flush(); saveSession(); } });
 
 /* ---------- Boot ---------- */

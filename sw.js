@@ -1,6 +1,6 @@
 /* Cook mode service worker: makes the app work offline.
    When you change any app file, bump VERSION so old caches are cleared. */
-const VERSION = 'cook-mode-v1.0.0';
+const VERSION = 'cook-mode-v1.1.0';
 const CORE = [
   './',
   './index.html',
